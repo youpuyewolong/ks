@@ -1,0 +1,10 @@
+data/
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite-*
+*.log
+backups/
+node_modules/
+test/fixtures/
