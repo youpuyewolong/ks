@@ -1,0 +1,1346 @@
+{
+  "album_id": "472",
+  "series": "口袋神探",
+  "title": "口袋神探 | 连续六年热播的儿童侦探故事|播放破亿",
+  "season": 1,
+  "expected_count": 148,
+  "cover_url": "https://cdn.kaishuhezi.com/kstory/onlineretailer/image/ab021cc0-08dd-485d-902e-15a01684f724_info_w=750_h=750_s=464233.jpg?x-oss-process=image/format,webp",
+  "source_url": "https://kids.kaishustory.com/h5/ks-detailPage/story?albumId=472",
+  "captured_at": "2026-09-10T01:53:09.775Z",
+  "complete": true,
+  "entries": [
+    {
+      "order": 1,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/d2dbf03c-44e9-44db-b587-f58b63de58c1.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:22",
+      "id": "cat112579",
+      "subtitle": "启动超级大脑，破解所有谜案！",
+      "title": "口袋神探·精彩预告",
+      "cover_file": "covers/cat112579.webp"
+    },
+    {
+      "order": 2,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/bfd7b5c5-aafa-4697-b0dd-c9e953ad172f.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:51",
+      "id": "cat112364",
+      "subtitle": "1-1 看不见的小偷",
+      "title": "第1集：密室包子失窃案",
+      "cover_file": "covers/cat112364.webp"
+    },
+    {
+      "order": 3,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:36",
+      "id": "cat112366",
+      "subtitle": "1-2 水的变形记",
+      "title": "科学揭秘：锅盖上为什么会有水滴？",
+      "cover_file": "covers/cat112366.webp"
+    },
+    {
+      "order": 4,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/115ab2ed-b705-452f-bb5f-825ee50b30fd.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:21",
+      "id": "cat112681",
+      "subtitle": "2-1 会飞的鸡蛋",
+      "title": "第2集：文具店硬币谜案",
+      "cover_file": "covers/cat112681.webp"
+    },
+    {
+      "order": 5,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:07",
+      "id": "cat112682",
+      "subtitle": "2-2 了不起的毛细作用",
+      "title": "科学揭秘：为什么纸会吸油？",
+      "cover_file": "covers/cat112682.webp"
+    },
+    {
+      "order": 6,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/c6c95f8e-ea0d-49da-978d-fecedce5dd0b.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:15",
+      "id": "cat112683",
+      "subtitle": "3-1 雨天的谎言",
+      "title": "第3集：校园恶作剧事件",
+      "cover_file": "covers/cat112683.webp"
+    },
+    {
+      "order": 7,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:04",
+      "id": "cat112684",
+      "subtitle": "3-2 蝴蝶飞行的秘密",
+      "title": "科学揭秘：下雨天看不到蝴蝶？",
+      "cover_file": "covers/cat112684.webp"
+    },
+    {
+      "order": 8,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/6bd41494-d7a7-4e8e-af61-f07c42f68e7d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:26",
+      "id": "cat112685",
+      "subtitle": "4-1 一封没有字的信",
+      "title": "第4集：鸡飞飞失踪案 上",
+      "cover_file": "covers/cat112685.webp"
+    },
+    {
+      "order": 9,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:42",
+      "id": "cat112686",
+      "subtitle": "4-2 写一封无字信",
+      "title": "科学揭秘：如何调制隐形墨水？",
+      "cover_file": "covers/cat112686.webp"
+    },
+    {
+      "order": 10,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/6bd41494-d7a7-4e8e-af61-f07c42f68e7d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:42",
+      "id": "cat112761",
+      "subtitle": "5-1 神秘人现身",
+      "title": "第5集：鸡飞飞失踪案 下",
+      "cover_file": "covers/cat112761.webp"
+    },
+    {
+      "order": 11,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:52",
+      "id": "cat112765",
+      "subtitle": "5-2 为什么有了五线谱还要发明简谱？",
+      "title": "科学揭秘：什么是简谱？",
+      "cover_file": "covers/cat112765.webp"
+    },
+    {
+      "order": 12,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/33c9d391-d926-4bfd-94e0-7e6d5a6cc9c6.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:50",
+      "id": "cat112807",
+      "subtitle": "6-1 爱臭美的小偷",
+      "title": "第6集：钻石戒指失踪案",
+      "cover_file": "covers/cat112807.webp"
+    },
+    {
+      "order": 13,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:42",
+      "id": "cat112808",
+      "subtitle": "6-2 飞来飞去的收藏家",
+      "title": "科学揭秘：鸟喜欢闪亮的东西？",
+      "cover_file": "covers/cat112808.webp"
+    },
+    {
+      "order": 14,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/78938acd-8653-4c51-a6f2-bb7a1e0a8d9d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "11:11",
+      "id": "cat112852",
+      "subtitle": "7-1 鬼屋惊魂记",
+      "title": "第7集：游乐场鬼屋谜案  上",
+      "cover_file": "covers/cat112852.webp"
+    },
+    {
+      "order": 15,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "03:03",
+      "id": "cat112855",
+      "subtitle": "7-2 傻傻分不清的UVA和UVB",
+      "title": "科学揭秘：为什么人会被晒黑？",
+      "cover_file": "covers/cat112855.webp"
+    },
+    {
+      "order": 16,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/78938acd-8653-4c51-a6f2-bb7a1e0a8d9d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:00",
+      "id": "cat112853",
+      "subtitle": "8-1 会说话的手表",
+      "title": "第8集：游乐场鬼屋谜案  下",
+      "cover_file": "covers/cat112853.webp"
+    },
+    {
+      "order": 17,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:16",
+      "id": "cat112857",
+      "subtitle": "8-2 神秘的生命密码",
+      "title": "科学揭秘：为什么DNA可以破案？",
+      "cover_file": "covers/cat112857.webp"
+    },
+    {
+      "order": 18,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/571550da-93d9-4274-81d3-f009e3ee616e.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:29",
+      "id": "cat112928",
+      "subtitle": "9-1 声音里的秘密",
+      "title": "第9集：巴顿将军绑架案",
+      "cover_file": "covers/cat112928.webp"
+    },
+    {
+      "order": 19,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:27",
+      "id": "cat112947",
+      "subtitle": "9-2 那些人类听不到的声音",
+      "title": "科学揭秘：这个世界到底有多吵？",
+      "cover_file": "covers/cat112947.webp"
+    },
+    {
+      "order": 20,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/181dee1e-e584-43e7-86f3-58ade03ccbfc.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:01",
+      "id": "cat112998",
+      "subtitle": "10-1 穿越时空的藏宝图",
+      "title": "第10集：图书馆寻宝案 上",
+      "cover_file": "covers/cat112998.webp"
+    },
+    {
+      "order": 21,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:39",
+      "id": "cat112999",
+      "subtitle": "10-2 abc和bcd的秘密约定",
+      "title": "科学揭秘：什么是“密钥”？",
+      "cover_file": "covers/cat112999.webp"
+    },
+    {
+      "order": 22,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/181dee1e-e584-43e7-86f3-58ade03ccbfc.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:40",
+      "id": "cat113029",
+      "subtitle": "11-1 最珍贵的宝藏",
+      "title": "第11集：图书馆寻宝案 下",
+      "cover_file": "covers/cat113029.webp"
+    },
+    {
+      "order": 23,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:11",
+      "id": "cat113030",
+      "subtitle": "11-2 都是氧气和水惹的祸",
+      "title": "科学揭秘：为什么铁会生锈？",
+      "cover_file": "covers/cat113030.webp"
+    },
+    {
+      "order": 24,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/5182904a-b003-4306-bb02-447ae207c1ef.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:28",
+      "id": "cat113046",
+      "subtitle": "12-1 墙里的歌声",
+      "title": "第12集：音乐教室钢琴谜案",
+      "cover_file": "covers/cat113046.webp"
+    },
+    {
+      "order": 25,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:33",
+      "id": "cat113047",
+      "subtitle": "12-2 奇妙的人体数字",
+      "title": "科学揭秘：猜猜一步有多长？",
+      "cover_file": "covers/cat113047.webp"
+    },
+    {
+      "order": 26,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/23b1402e-73a8-4813-954a-26023477c23b.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:11",
+      "id": "cat113067",
+      "subtitle": "13-1 能作证的电脑",
+      "title": "第13集：史前琥珀失窃案 上",
+      "cover_file": "covers/cat113067.webp"
+    },
+    {
+      "order": 27,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:45",
+      "id": "cat113068",
+      "subtitle": "13-2 凝固时光的宝石",
+      "title": "科学揭秘：琥珀是怎么形成的？",
+      "cover_file": "covers/cat113068.webp"
+    },
+    {
+      "order": 28,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/23b1402e-73a8-4813-954a-26023477c23b.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:20",
+      "id": "cat113092",
+      "subtitle": "14-1 花里的秘密",
+      "title": "第14集：史前琥珀失窃案 下",
+      "cover_file": "covers/cat113092.webp"
+    },
+    {
+      "order": 29,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:33",
+      "id": "cat113093",
+      "subtitle": "14-2 植物也有自己的性格和喜好",
+      "title": "科学揭秘：不爱喝水的植物?",
+      "cover_file": "covers/cat113093.webp"
+    },
+    {
+      "order": 30,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/18c3ebf8-c949-43ed-937a-38302bee874a.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:21",
+      "id": "cat113123",
+      "subtitle": "15-1 不会说谎的金鱼",
+      "title": "第15集：泰迪熊抢劫案",
+      "cover_file": "covers/cat113123.webp"
+    },
+    {
+      "order": 31,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:06",
+      "id": "cat113122",
+      "subtitle": "15-2 奇妙的鱼鳃系统",
+      "title": "科学揭秘：鱼为什么离不开水？",
+      "cover_file": "covers/cat113122.webp"
+    },
+    {
+      "order": 32,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/67d163e3-5395-4524-b2a9-6a606b76845d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "11:57",
+      "id": "cat113136",
+      "subtitle": "16-1 两颗黑色的爱心",
+      "title": "第16集：黑雨衣大盗谜案 上",
+      "cover_file": "covers/cat113136.webp"
+    },
+    {
+      "order": 33,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:16",
+      "id": "cat113137",
+      "subtitle": "16-2 左手还是右手，基因说了算",
+      "title": "科学揭秘：为什么会有左撇子？",
+      "cover_file": "covers/cat113137.webp"
+    },
+    {
+      "order": 34,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/2e6ca91c-7eb5-42df-9dcc-20c8a016e3b7.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:09",
+      "id": "cat113168",
+      "subtitle": "17-1 蛋糕店的意外收获",
+      "title": "第17集：黑雨衣大盗谜案 下",
+      "cover_file": "covers/cat113168.webp"
+    },
+    {
+      "order": 35,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:21",
+      "id": "cat113164",
+      "subtitle": "17-2 世界上最古老最坚硬的宝石",
+      "title": "科学揭秘：钻石原来是碳？",
+      "cover_file": "covers/cat113164.webp"
+    },
+    {
+      "order": 36,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/98a9788e-3361-4329-a638-6389caa3d2ec.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:31",
+      "id": "cat113192",
+      "subtitle": "18-1 真假礼物风波",
+      "title": "第18集：球星签名照谜案",
+      "cover_file": "covers/cat113192.webp"
+    },
+    {
+      "order": 37,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:31",
+      "id": "cat113187",
+      "subtitle": "18-2 地球上的24个时区",
+      "title": "科学揭秘：为什么会有时差？",
+      "cover_file": "covers/cat113187.webp"
+    },
+    {
+      "order": 38,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/a48d4944-b1cb-4e72-ae94-11308b0b976c.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:19",
+      "id": "cat113236",
+      "subtitle": "19-1 “有味道”的证据",
+      "title": "第19集：农家乐小鹅失踪案",
+      "cover_file": "covers/cat113236.webp"
+    },
+    {
+      "order": 39,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:16",
+      "id": "cat113237",
+      "subtitle": "19-2 动物身体内的“导航系统”",
+      "title": "科学揭秘：归巢是一种本能？",
+      "cover_file": "covers/cat113237.webp"
+    },
+    {
+      "order": 40,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/11064d60-9c06-4612-92e7-f6cd1bfeec74.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "11:42",
+      "id": "cat113238",
+      "subtitle": "20-1 突如其来的黑暗",
+      "title": "第20集：宝剑被盗案 上",
+      "cover_file": "covers/cat113238.webp"
+    },
+    {
+      "order": 41,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:39",
+      "id": "cat113239",
+      "subtitle": "20-2 了不起的水循环",
+      "title": "科学揭秘：云是水做的吗？",
+      "cover_file": "covers/cat113239.webp"
+    },
+    {
+      "order": 42,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/11064d60-9c06-4612-92e7-f6cd1bfeec74.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "11:07",
+      "id": "cat113259",
+      "subtitle": "21-1 嫌疑人竟然是TA",
+      "title": "第21集：宝剑被盗案 下",
+      "cover_file": "covers/cat113259.webp"
+    },
+    {
+      "order": 43,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:53",
+      "id": "cat113260",
+      "subtitle": "21-2 原来气质也有性别差异",
+      "title": "科学揭秘：男生女生如何辨？",
+      "cover_file": "covers/cat113260.webp"
+    },
+    {
+      "order": 44,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/f7bd8dfa-b1aa-482c-a8a8-62363eb62381.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:34",
+      "id": "cat113298",
+      "subtitle": "22-1 真正的冠军",
+      "title": "第22集：趣味运动会谜案",
+      "cover_file": "covers/cat113298.webp"
+    },
+    {
+      "order": 45,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:04",
+      "id": "cat113299",
+      "subtitle": "22-2 神奇的人体身份证",
+      "title": "科学揭秘：指纹如何说话？",
+      "cover_file": "covers/cat113299.webp"
+    },
+    {
+      "order": 46,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/7276d431-8d8c-4ea9-a65e-e744f99f6abe.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:21",
+      "id": "cat113330",
+      "subtitle": "23-1 最美味的毒药",
+      "title": "第23集：小美离奇中毒案",
+      "cover_file": "covers/cat113330.webp"
+    },
+    {
+      "order": 47,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:36",
+      "id": "cat113331",
+      "subtitle": "23-2 人类之蜜糖，狗狗之毒药",
+      "title": "科学揭秘：巧克力居然是毒药？",
+      "cover_file": "covers/cat113331.webp"
+    },
+    {
+      "order": 48,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/fd01e283-962c-4b9e-b552-c0cf4fe63ced.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:51",
+      "id": "cat113332",
+      "subtitle": "24-1 公平杯的“诡计”",
+      "title": "第24集：中秋节古董谜案",
+      "cover_file": "covers/cat113332.webp"
+    },
+    {
+      "order": 49,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:08",
+      "id": "cat113333",
+      "subtitle": "24-2 有趣的虹吸原理",
+      "title": "科学揭秘：倒不满的酒杯？",
+      "cover_file": "covers/cat113333.webp"
+    },
+    {
+      "order": 50,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/0669229c-d4c7-4c9e-afc6-41efe24c70de.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:19",
+      "id": "cat113376",
+      "subtitle": "25-1 不存在的鞋印",
+      "title": "第25集：数学试卷被盗案 上",
+      "cover_file": "covers/cat113376.webp"
+    },
+    {
+      "order": 51,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:32",
+      "id": "cat113377",
+      "subtitle": "25-2 足迹大追踪",
+      "title": "科学揭秘：藏在脚印中的秘密？",
+      "cover_file": "covers/cat113377.webp"
+    },
+    {
+      "order": 52,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/0669229c-d4c7-4c9e-afc6-41efe24c70de.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:32",
+      "id": "cat113427",
+      "subtitle": "26-1 是谁在说谎？",
+      "title": "第26集：数学试卷被盗案 下",
+      "cover_file": "covers/cat113427.webp"
+    },
+    {
+      "order": 53,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:51",
+      "id": "cat113428",
+      "subtitle": "26-2 植物体内的“闹钟”",
+      "title": "科学揭秘：牵牛花什么时候开？",
+      "cover_file": "covers/cat113428.webp"
+    },
+    {
+      "order": 54,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ebcb42a4-cef5-437a-972e-770b3d645894.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:42",
+      "id": "cat113463",
+      "subtitle": "27-1 杜一南的秘密",
+      "title": "第27集：意大利花瓶谜案",
+      "cover_file": "covers/cat113463.webp"
+    },
+    {
+      "order": 55,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:05",
+      "id": "cat113464",
+      "subtitle": "27-2 小灰尘，大世界",
+      "title": "科学揭秘：为什么会有灰尘？",
+      "cover_file": "covers/cat113464.webp"
+    },
+    {
+      "order": 56,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/d999df22-01bd-4759-8690-fc02d305bc27.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:03",
+      "id": "cat113480",
+      "subtitle": "28-1 墙上的线索",
+      "title": "第28集：军功章失窃案",
+      "cover_file": "covers/cat113480.webp"
+    },
+    {
+      "order": 57,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:09",
+      "id": "cat113481",
+      "subtitle": "28-2 我的“网盘”我做主",
+      "title": "科学揭秘：为什么蜘蛛要织网？",
+      "cover_file": "covers/cat113481.webp"
+    },
+    {
+      "order": 58,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/f4386189-cb8a-474d-b66d-312c20e89be2.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:23",
+      "id": "cat113487",
+      "subtitle": "29-1 探险营的第一天",
+      "title": "第29集：凤凰山树林迷路事件",
+      "cover_file": "covers/cat113487.webp"
+    },
+    {
+      "order": 59,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:23",
+      "id": "cat113488",
+      "subtitle": "29-2 手表变身指南针",
+      "title": "科学揭秘：手表也能辨方向？",
+      "cover_file": "covers/cat113488.webp"
+    },
+    {
+      "order": 60,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/d1606076-a5ac-4fec-893d-9e839b861d27.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:15",
+      "id": "cat113489",
+      "subtitle": "30-1 清晨的尖叫声",
+      "title": "第30集：客栈长毛兔案件",
+      "cover_file": "covers/cat113489.webp"
+    },
+    {
+      "order": 61,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:49",
+      "id": "cat113490",
+      "subtitle": "30-2 不能吃的食物",
+      "title": "科学揭秘：发芽土豆有毒吗？",
+      "cover_file": "covers/cat113490.webp"
+    },
+    {
+      "order": 62,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/1b550fea-8d79-404e-ba70-ce599b51dd6d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:21",
+      "id": "cat113505",
+      "subtitle": "31-1 守护正义的诚实之剑",
+      "title": "第31集：遥控飞机失踪案",
+      "cover_file": "covers/cat113505.webp"
+    },
+    {
+      "order": 63,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:58",
+      "id": "cat113506",
+      "subtitle": "31-2 点亮夜空的“小精灵”",
+      "title": "科学揭秘：萤火虫发光的秘密？",
+      "cover_file": "covers/cat113506.webp"
+    },
+    {
+      "order": 64,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/f6395ca6-1c65-42b9-b97b-a1c62a7bf89f.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:40",
+      "id": "cat113507",
+      "subtitle": "32-1 神秘的古彩戏法",
+      "title": "第32集：真假猴王面具案 上",
+      "cover_file": "covers/cat113507.webp"
+    },
+    {
+      "order": 65,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:13",
+      "id": "cat113508",
+      "subtitle": "32-2 聊聊密度那些事",
+      "title": "科学揭秘：铁和棉花谁更重？",
+      "cover_file": "covers/cat113508.webp"
+    },
+    {
+      "order": 66,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/f6395ca6-1c65-42b9-b97b-a1c62a7bf89f.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:46",
+      "id": "cat113627",
+      "subtitle": "33-1 比金面具更重要的东西",
+      "title": "第33集：真假猴王面具案 下",
+      "cover_file": "covers/cat113627.webp"
+    },
+    {
+      "order": 67,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:13",
+      "id": "cat113628",
+      "subtitle": "33-2 蜡烛燃烧的秘密",
+      "title": "科学揭秘：蜡烛为什么会“流泪”？",
+      "cover_file": "covers/cat113628.webp"
+    },
+    {
+      "order": 68,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/582fdbe0-33be-47a9-afe2-990eb4ea6480.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:52",
+      "id": "cat113648",
+      "subtitle": "34-1 被“诅咒”的气球",
+      "title": "第34集：游乐场气球爆炸案",
+      "cover_file": "covers/cat113648.webp"
+    },
+    {
+      "order": 69,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:20",
+      "id": "cat113652",
+      "subtitle": "34-2 只有一种颜色的光",
+      "title": "科学揭秘：激光笔危险吗？",
+      "cover_file": "covers/cat113652.webp"
+    },
+    {
+      "order": 70,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/fbf8efc3-998f-4b4b-8753-af3f2ea76851.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:12",
+      "id": "cat113673",
+      "subtitle": "35-1 芙蓉村除妖记",
+      "title": "第35集：古树流泪谜案",
+      "cover_file": "covers/cat113673.webp"
+    },
+    {
+      "order": 71,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:20",
+      "id": "cat113674",
+      "subtitle": "35-2 植物的“特异功能”",
+      "title": "科学揭秘：古树为什么会流泪？",
+      "cover_file": "covers/cat113674.webp"
+    },
+    {
+      "order": 72,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/a02314ae-aea6-42f6-877e-d5ed40d5c275.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:57",
+      "id": "cat113688",
+      "subtitle": "36-1 拍卖会上的意外事件",
+      "title": "第36集：深海之星失踪案 上",
+      "cover_file": "covers/cat113688.webp"
+    },
+    {
+      "order": 73,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:05",
+      "id": "cat113689",
+      "subtitle": "36-2 硬度和脆性是怎么回事？",
+      "title": "科学揭秘：蓝宝石到底有多硬？",
+      "cover_file": "covers/cat113689.webp"
+    },
+    {
+      "order": 74,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/a02314ae-aea6-42f6-877e-d5ed40d5c275.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:17",
+      "id": "cat113733",
+      "subtitle": "37-1 不可思议的小偷",
+      "title": "第37集：深海之星失踪案 下",
+      "cover_file": "covers/cat113733.webp"
+    },
+    {
+      "order": 75,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:15",
+      "id": "cat113734",
+      "subtitle": "37-2 人类的好朋友",
+      "title": "科学揭秘：为什么狗这么聪明？",
+      "cover_file": "covers/cat113734.webp"
+    },
+    {
+      "order": 76,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/df97b52b-5916-45bd-9a3b-c26cc7fdbffa.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:11",
+      "id": "cat113759",
+      "subtitle": "38-1 黑雨衣大盗的挑战",
+      "title": "第38集：凤舞九天被盗案",
+      "cover_file": "covers/cat113759.webp"
+    },
+    {
+      "order": 77,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:24",
+      "id": "cat113760",
+      "subtitle": "38-2 红绿灯会说话",
+      "title": "科学揭秘：红绿灯是怎么来的？",
+      "cover_file": "covers/cat113760.webp"
+    },
+    {
+      "order": 78,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/5ebf6130-7e12-4f8e-8b22-31d8fab6555d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:43",
+      "id": "cat113780",
+      "subtitle": "39-1 恐龙时代的谜语",
+      "title": "第39集：荷塘月色消失案 上",
+      "cover_file": "covers/cat113780.webp"
+    },
+    {
+      "order": 79,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:16",
+      "id": "cat113782",
+      "subtitle": "39-2 原来如此，大熊猫也是活化石",
+      "title": "科学揭秘：什么是活化石？",
+      "cover_file": "covers/cat113782.webp"
+    },
+    {
+      "order": 80,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/5ebf6130-7e12-4f8e-8b22-31d8fab6555d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:31",
+      "id": "cat113781",
+      "subtitle": "40-1 月光下的黑影",
+      "title": "第40集：荷塘月色消失案 下",
+      "cover_file": "covers/cat113781.webp"
+    },
+    {
+      "order": 81,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:48",
+      "id": "cat113783",
+      "subtitle": "40-2 警报！警报！前方电路超载",
+      "title": "科学揭秘：为什么会跳闸？",
+      "cover_file": "covers/cat113783.webp"
+    },
+    {
+      "order": 82,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/5f4eeecd-4744-4ad4-9558-6cfe0556548c.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:34",
+      "id": "cat113857",
+      "subtitle": "41-1 古诗里的线索",
+      "title": "第41集：梧桐镇记忆保卫战 上",
+      "cover_file": "covers/cat113857.webp"
+    },
+    {
+      "order": 83,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:35",
+      "id": "cat113858",
+      "subtitle": "41-2 樟木盒子里的秘密",
+      "title": "科学揭秘：如何让古籍更长寿？",
+      "cover_file": "covers/cat113858.webp"
+    },
+    {
+      "order": 84,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/5f4eeecd-4744-4ad4-9558-6cfe0556548c.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:39",
+      "id": "cat113896",
+      "subtitle": "42-1 黑雨衣大盗现身",
+      "title": "第42集：梧桐镇记忆保卫战 下",
+      "cover_file": "covers/cat113896.webp"
+    },
+    {
+      "order": 85,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:29",
+      "id": "cat113897",
+      "subtitle": "42-2 伤害文物的“凶手”",
+      "title": "科学揭秘：为什么不能开闪光灯？",
+      "cover_file": "covers/cat113897.webp"
+    },
+    {
+      "order": 86,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/a043d654-2e23-4414-a893-e640d0e37fbd.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:00",
+      "id": "cat113940",
+      "subtitle": "43-1 最珍贵的东西",
+      "title": "第43集：金元宝丢失案",
+      "cover_file": "covers/cat113940.webp"
+    },
+    {
+      "order": 87,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:44",
+      "id": "cat113947",
+      "subtitle": "43-2 有趣的货币演变",
+      "title": "科学揭秘：贝壳也能当钱花？",
+      "cover_file": "covers/cat113947.webp"
+    },
+    {
+      "order": 88,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/b9e17435-a937-403d-a6bd-81dfb5226562.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:04",
+      "id": "cat113942",
+      "subtitle": "44-1 鸡窝里的大冒险",
+      "title": "第44集：鸡飞飞的飞行事故",
+      "cover_file": "covers/cat113942.webp"
+    },
+    {
+      "order": 89,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:43",
+      "id": "cat113948",
+      "subtitle": "44-2 被人类冤枉的黄鼬",
+      "title": "科学揭秘：黄鼠狼是偷鸡贼吗？",
+      "cover_file": "covers/cat113948.webp"
+    },
+    {
+      "order": 90,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/a3939652-c59c-4ae1-97ab-5734522b4be9.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:53",
+      "id": "cat113991",
+      "subtitle": "45-1 危险！海盗的约定",
+      "title": "第45集： 阿明离奇失踪案",
+      "cover_file": "covers/cat113991.webp"
+    },
+    {
+      "order": 91,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:20",
+      "id": "cat113992",
+      "subtitle": "45-2 画出声音的形状",
+      "title": "科学揭秘：声音也能破案？",
+      "cover_file": "covers/cat113992.webp"
+    },
+    {
+      "order": 92,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/2dc6874f-838c-40ad-9f42-4ee9966eba3a.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "12:10",
+      "id": "cat114025",
+      "subtitle": "46-1 牧羊女失声之谜",
+      "title": "第46集：剧场演出意外事件",
+      "cover_file": "covers/cat114025.webp"
+    },
+    {
+      "order": 93,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:25",
+      "id": "cat114026",
+      "subtitle": "46-2 超轻“变声器”",
+      "title": "科学揭秘：氦气如何改变声音？",
+      "cover_file": "covers/cat114026.webp"
+    },
+    {
+      "order": 94,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/41d37507-0ca3-453d-acff-517c17ad6302.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:32",
+      "id": "cat114123",
+      "subtitle": "47-1 演出服下面的真面目",
+      "title": "第47集：化妆间喷雾调包案",
+      "cover_file": "covers/cat114123.webp"
+    },
+    {
+      "order": 95,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "03:10",
+      "id": "cat114124",
+      "subtitle": "47-2 病毒和免疫系统的战争",
+      "title": "科学揭秘：感冒为什么会鼻塞？",
+      "cover_file": "covers/cat114124.webp"
+    },
+    {
+      "order": 96,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ff9b3994-a279-4a6c-8d1d-249d4ec2a55a.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:05",
+      "id": "cat114130",
+      "subtitle": "48-1 阳光下的罪证",
+      "title": "第48集：向日葵画廊事件",
+      "cover_file": "covers/cat114130.webp"
+    },
+    {
+      "order": 97,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:30",
+      "id": "cat114131",
+      "subtitle": "48-2 凸透镜是怎么做到聚光的",
+      "title": "科学揭秘：如何改变光的路线？",
+      "cover_file": "covers/cat114131.webp"
+    },
+    {
+      "order": 98,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/d11219c1-7af6-4838-bb8b-d958fc255a19.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:48",
+      "id": "cat114158",
+      "subtitle": "49-1 大侦探联盟",
+      "title": "第49集：漫画家失约之谜",
+      "cover_file": "covers/cat114158.webp"
+    },
+    {
+      "order": 99,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:29",
+      "id": "cat114159",
+      "subtitle": "49-2 植物界的营养大王",
+      "title": "科学揭秘：什么是植物肉？",
+      "cover_file": "covers/cat114159.webp"
+    },
+    {
+      "order": 100,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/7262e8c0-8c95-42e0-adf3-c60bb880257d.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:05",
+      "id": "cat114194",
+      "subtitle": "50-1 神秘的207房间",
+      "title": "第50集：纳兰嫣身份谜案",
+      "cover_file": "covers/cat114194.webp"
+    },
+    {
+      "order": 101,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:02",
+      "id": "cat114195",
+      "subtitle": "50-2 紫外线下的神奇世界",
+      "title": "科学揭秘：肉眼看不到的电磁波？",
+      "cover_file": "covers/cat114195.webp"
+    },
+    {
+      "order": 102,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/b526bb49-1f01-4673-a209-90c27e2d0882.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:28",
+      "id": "cat114256",
+      "subtitle": "51-1 不存在的嫌疑人",
+      "title": "第51集：智能音箱失踪案",
+      "cover_file": "covers/cat114256.webp"
+    },
+    {
+      "order": 103,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:07",
+      "id": "cat114258",
+      "subtitle": "51-2 随时随地读取信息",
+      "title": "科学揭秘：“云端”在天上吗？",
+      "cover_file": "covers/cat114258.webp"
+    },
+    {
+      "order": 104,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/11bc61a2-269d-4c96-b8ef-1d3064a229f5.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:43",
+      "id": "cat114257",
+      "subtitle": "52-1 回忆里的线索",
+      "title": "第52集：云端上的声音谜案",
+      "cover_file": "covers/cat114257.webp"
+    },
+    {
+      "order": 105,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:22",
+      "id": "cat114259",
+      "subtitle": "52-2 建筑材料大比拼",
+      "title": "科学揭秘：什么房子最坚固？",
+      "cover_file": "covers/cat114259.webp"
+    },
+    {
+      "order": 106,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/e9188e51-5ecc-4d0c-8323-0138778230db.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:06",
+      "id": "cat114309",
+      "subtitle": "53-1 不空寺的守护者",
+      "title": "第53集：老庙石像被盗案",
+      "cover_file": "covers/cat114309.webp"
+    },
+    {
+      "order": 107,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:25",
+      "id": "cat114310",
+      "subtitle": "53-2 进攻，免疫系统大军！",
+      "title": "科学揭秘：蜂毒会致命吗？",
+      "cover_file": "covers/cat114310.webp"
+    },
+    {
+      "order": 108,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/a41c02ff-3ceb-45a8-9623-0ec3ed97b1f7.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:37",
+      "id": "cat114335",
+      "subtitle": "54-1 可疑的数字",
+      "title": "第54集：瑶台玉凤失窃案",
+      "cover_file": "covers/cat114335.webp"
+    },
+    {
+      "order": 109,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:35",
+      "id": "cat114336",
+      "subtitle": "54-2 镜子中的相反世界",
+      "title": "科学揭秘：你能分清左右吗？",
+      "cover_file": "covers/cat114336.webp"
+    },
+    {
+      "order": 110,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/7cc09e32-c96c-44e4-a0da-6a0cf895a6c0.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:30",
+      "id": "cat114358",
+      "subtitle": "55-1 来自月球的“神药”",
+      "title": "第55集：神医戒指失踪案",
+      "cover_file": "covers/cat114358.webp"
+    },
+    {
+      "order": 111,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:16",
+      "id": "cat114360",
+      "subtitle": "55-2 去月球上看一看",
+      "title": "科学揭秘：月亮长什么样子？",
+      "cover_file": "covers/cat114360.webp"
+    },
+    {
+      "order": 112,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/13c9c71d-4cfb-4561-b96b-215375b84eca.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:30",
+      "id": "cat114359",
+      "subtitle": "56-1 远道而来的“龙王”",
+      "title": "第56集：龙王回宫事件",
+      "cover_file": "covers/cat114359.webp"
+    },
+    {
+      "order": 113,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:29",
+      "id": "cat114361",
+      "subtitle": "56-2 换个地方做“大王”",
+      "title": "科学揭秘：大闸蟹是入侵物种？",
+      "cover_file": "covers/cat114361.webp"
+    },
+    {
+      "order": 114,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/335b8a53-f44c-4626-839d-c71585719a45.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:18",
+      "id": "cat114426",
+      "subtitle": "57-1 最轻的证据",
+      "title": "第57集：将军印被盗案",
+      "cover_file": "covers/cat114426.webp"
+    },
+    {
+      "order": 115,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:24",
+      "id": "cat114427",
+      "subtitle": "57-2 小心！电荷要爆发了！",
+      "title": "科学揭秘：为什么毛衣会带电？",
+      "cover_file": "covers/cat114427.webp"
+    },
+    {
+      "order": 116,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/a7373b85-9078-4282-8258-317573b8cb89.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:52",
+      "id": "cat114453",
+      "subtitle": "58-1 黑白暗号",
+      "title": "第58集：非洲象牙追踪事件",
+      "cover_file": "covers/cat114453.webp"
+    },
+    {
+      "order": 117,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:21",
+      "id": "cat114454",
+      "subtitle": "58-2 我的野生动物朋友们",
+      "title": "科学揭秘：为什么要保护它们？",
+      "cover_file": "covers/cat114454.webp"
+    },
+    {
+      "order": 118,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/32c822f4-16f6-491a-bba6-f5b4393b5a89.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:42",
+      "id": "cat114515",
+      "subtitle": "59-1 甜蜜的危险",
+      "title": "第59集：离奇昏迷调查事件",
+      "cover_file": "covers/cat114515.webp"
+    },
+    {
+      "order": 119,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:34",
+      "id": "cat114517",
+      "subtitle": "59-2 为什么糖尿病人不能吃糖",
+      "title": "科学揭秘：糖是有害食物吗？",
+      "cover_file": "covers/cat114517.webp"
+    },
+    {
+      "order": 120,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/435bd69b-b5d1-4bcb-a6c9-d00c403f1ee0.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:44",
+      "id": "cat114516",
+      "subtitle": "60-1 消失的美味",
+      "title": "第60集：“云上的紫罗兰”凋谢之谜",
+      "cover_file": "covers/cat114516.webp"
+    },
+    {
+      "order": 121,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "01:49",
+      "id": "cat114518",
+      "subtitle": "60-2 带咸味的营养物质",
+      "title": "科学揭秘：人为什么要吃盐？",
+      "cover_file": "covers/cat114518.webp"
+    },
+    {
+      "order": 122,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/43b8c7e7-2229-4b96-9751-76961b735e02.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:41",
+      "id": "cat114600",
+      "subtitle": "61-1 牛妈妈的怪病",
+      "title": "第61集：牛棚中的谜案",
+      "cover_file": "covers/cat114600.webp"
+    },
+    {
+      "order": 123,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:28",
+      "id": "cat114601",
+      "subtitle": "61-2 看到不一样的世界",
+      "title": "科学揭秘：牛真的讨厌红色吗？",
+      "cover_file": "covers/cat114601.webp"
+    },
+    {
+      "order": 124,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/57a273fa-4a5a-49c5-847b-9b1b0f896434.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:39",
+      "id": "cat114632",
+      "subtitle": "62-1 狡猾的“狐狸”",
+      "title": "第62集：别墅狐仙传说之谜",
+      "cover_file": "covers/cat114632.webp"
+    },
+    {
+      "order": 125,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:35",
+      "id": "cat114633",
+      "subtitle": "62-2 百变的影子",
+      "title": "科学揭秘：影子是怎么产生的？",
+      "cover_file": "covers/cat114633.webp"
+    },
+    {
+      "order": 126,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/14d3989e-e63b-4e8c-ae17-ffc823eb5230.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:11",
+      "id": "cat114670",
+      "subtitle": "63-1 藏在诗词里的宝贝",
+      "title": "第63集：闪电手宝藏谜案",
+      "cover_file": "covers/cat114670.webp"
+    },
+    {
+      "order": 127,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:29",
+      "id": "cat114672",
+      "subtitle": "63-2 全身是宝的水果",
+      "title": "科学揭秘：橘子会让你变色吗？",
+      "cover_file": "covers/cat114672.webp"
+    },
+    {
+      "order": 128,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/1ac2f21d-0736-46fd-8e26-df9d92acd0ab.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:13",
+      "id": "cat114671",
+      "subtitle": "64-1 寻找小火车",
+      "title": "第64集：飞鸟与火车之谜",
+      "cover_file": "covers/cat114671.webp"
+    },
+    {
+      "order": 129,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:03",
+      "id": "cat114673",
+      "subtitle": "64-2 最古老和最先进的火车",
+      "title": "科学揭秘：什么是蒸汽火车？",
+      "cover_file": "covers/cat114673.webp"
+    },
+    {
+      "order": 130,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/7bdbbb78-cf88-4858-b673-cd343259f33e.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:55",
+      "id": "cat114699",
+      "subtitle": "65-1 商业间谍的秘密行动",
+      "title": "第65集：机密硬盘被盗案",
+      "cover_file": "covers/cat114699.webp"
+    },
+    {
+      "order": 131,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:08",
+      "id": "cat114700",
+      "subtitle": "65-2 汽车的动力之源",
+      "title": "科学揭秘：汽车为什么会跑？",
+      "cover_file": "covers/cat114700.webp"
+    },
+    {
+      "order": 132,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ef18c296-42ce-46c9-93fb-abefe3c9eb60.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:07",
+      "id": "cat114728",
+      "subtitle": "66-1 颠倒的真相",
+      "title": "第66集：白羽毛舞鞋失踪案",
+      "cover_file": "covers/cat114728.webp"
+    },
+    {
+      "order": 133,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:17",
+      "id": "cat114724",
+      "subtitle": "66-2 神经系统的指令",
+      "title": "科学揭秘：手指泡水后会变皱？",
+      "cover_file": "covers/cat114724.webp"
+    },
+    {
+      "order": 134,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/c829c471-8047-4d89-8eb2-24f11ef40104.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "13:35",
+      "id": "cat114787",
+      "subtitle": "67-1 重要的阿嚏元素",
+      "title": "第67集：流星雨陨石追踪案",
+      "cover_file": "covers/cat114787.webp"
+    },
+    {
+      "order": 135,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:36",
+      "id": "cat114788",
+      "subtitle": "67-2 落到地球上的星星",
+      "title": "科学揭秘：流星是从哪里来的？",
+      "cover_file": "covers/cat114788.webp"
+    },
+    {
+      "order": 136,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/b3c7c0f3-b0ec-4ec7-9c70-fb4364fc7db8.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "16:04",
+      "id": "cat114789",
+      "subtitle": "68-1 看不懂的地图",
+      "title": "第68集：凤凰山古墓迷踪",
+      "cover_file": "covers/cat114789.webp"
+    },
+    {
+      "order": 137,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:22",
+      "id": "cat114790",
+      "subtitle": "68-2 比拍照还清晰的古老技术",
+      "title": "科学揭秘：拓片是什么？",
+      "cover_file": "covers/cat114790.webp"
+    },
+    {
+      "order": 138,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/5fbbba19-37de-41dd-a57b-e061199e9927.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "16:22",
+      "id": "cat114812",
+      "subtitle": "69-1 石壁上的谜题",
+      "title": "第69集：天威将军墓中疑云",
+      "cover_file": "covers/cat114812.webp"
+    },
+    {
+      "order": 139,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:31",
+      "id": "cat114813",
+      "subtitle": "69-2 看不见的危险",
+      "title": "科学揭秘：哪些洞穴不能进？",
+      "cover_file": "covers/cat114813.webp"
+    },
+    {
+      "order": 140,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/2e482496-6cd8-4653-9494-9da29186cea2.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "15:23",
+      "id": "cat114856",
+      "subtitle": "70-1 墙壁里的火光",
+      "title": "第70集：古墓里的秘密基地",
+      "cover_file": "covers/cat114856.webp"
+    },
+    {
+      "order": 141,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:05",
+      "id": "cat114857",
+      "subtitle": "70-2 能点火的“魔法石”",
+      "title": "科学揭秘：什么石头可以取火？",
+      "cover_file": "covers/cat114857.webp"
+    },
+    {
+      "order": 142,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/5e3628b7-04fe-4155-9cc8-5b572b5e4bca.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:36",
+      "id": "cat114908",
+      "subtitle": "71-1 转动历史的时钟",
+      "title": "第71集：时空交错的地宫",
+      "cover_file": "covers/cat114908.webp"
+    },
+    {
+      "order": 143,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:19",
+      "id": "cat114909",
+      "subtitle": "71-2 了不起的天干地支",
+      "title": "科学揭秘：十二时辰怎么算？",
+      "cover_file": "covers/cat114909.webp"
+    },
+    {
+      "order": 144,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/1a98de36-edb4-49be-9072-f6d2007b4037.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "14:33",
+      "id": "cat114913",
+      "subtitle": "72-1 走不出去的地宫",
+      "title": "第72集：地宫里的神秘宝贝",
+      "cover_file": "covers/cat114913.webp"
+    },
+    {
+      "order": 145,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:00",
+      "id": "cat114914",
+      "subtitle": "72-2 不仅能探险，还能送快递",
+      "title": "科学揭秘：无人机有什么功能？",
+      "cover_file": "covers/cat114914.webp"
+    },
+    {
+      "order": 146,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/1ee4b1b5-801a-4872-81a8-cf70438609a2.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "17:20",
+      "id": "cat114983",
+      "subtitle": "73-1 发射！超级能量波",
+      "title": "第73集：最后的真相",
+      "cover_file": "covers/cat114983.webp"
+    },
+    {
+      "order": 147,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ee38ec30-02c4-4b46-9edb-504c60565942.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "02:08",
+      "id": "cat114984",
+      "subtitle": "73-2 明适应VS暗适应",
+      "title": "科学揭秘：为什么眼睛会怕光？",
+      "cover_file": "covers/cat114984.webp"
+    },
+    {
+      "order": 148,
+      "cover": "https://cdn.kaishuhezi.com/kstory/story/image/ef0ef92c-83ad-441b-9b48-63c32a2c6b58.jpg?x-oss-process=image/resize,w_253,limit_1/format,webp",
+      "duration": "03:01",
+      "id": "cat115070",
+      "subtitle": "惊喜，有彩蛋",
+      "title": "口袋神探小秘密",
+      "cover_file": "covers/cat115070.webp"
+    }
+  ],
+  "cover_file": "covers/album.webp"
+}

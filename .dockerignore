@@ -9,3 +9,9 @@
 !artwork.js
 !style.css
 !admin.css
+!database.js
+!import-catalog.js
+!matching.js
+!catalogs/
+!catalogs/kaishu/
+!catalogs/kaishu/**

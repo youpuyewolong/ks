@@ -46,6 +46,8 @@ hostname -I
 
 ## 更新代码
 
+更新后启动会自动迁移旧数据库，并将包内口袋神探第 1～7 季目录及本地图片导入数据卷。不会上传或覆盖已有录音；建议更新前按下文先备份。已导入的季不会每次启动重复导入。
+
 ```sh
 git pull --ff-only
 sudo docker compose up -d --build

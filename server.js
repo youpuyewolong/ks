@@ -5,24 +5,17 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { Transform } = require('node:stream');
 const { pipeline } = require('node:stream/promises');
-const { DatabaseSync } = require('node:sqlite');
+const { openDatabase } = require('./database');
+const { importBundled } = require('./import-catalog');
 
-function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'data'), password = process.env.ADMIN_PASSWORD || '' } = {}) {
+function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'data'), password = process.env.ADMIN_PASSWORD || '', seedCatalogs = false } = {}) {
   fs.mkdirSync(path.join(dataDir, 'media'), { recursive: true });
-  const db = new DatabaseSync(path.join(dataDir, 'stories.sqlite'));
-  db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
-    CREATE TABLE IF NOT EXISTS categories(id TEXT PRIMARY KEY,name TEXT NOT NULL UNIQUE,sort_order INTEGER NOT NULL DEFAULT 0);
-    CREATE TABLE IF NOT EXISTS media(id TEXT PRIMARY KEY,filename TEXT NOT NULL,mime TEXT NOT NULL,kind TEXT NOT NULL,size INTEGER NOT NULL);
-    CREATE TABLE IF NOT EXISTS stories(id TEXT PRIMARY KEY,title TEXT NOT NULL,description TEXT NOT NULL DEFAULT '',category_id TEXT REFERENCES categories(id) ON DELETE SET NULL,cover_id TEXT REFERENCES media(id),published INTEGER NOT NULL DEFAULT 0,created_at INTEGER NOT NULL);
-    CREATE TABLE IF NOT EXISTS episodes(id TEXT PRIMARY KEY,story_id TEXT NOT NULL REFERENCES stories(id) ON DELETE CASCADE,title TEXT NOT NULL,media_id TEXT NOT NULL REFERENCES media(id),sort_order INTEGER NOT NULL,duration REAL NOT NULL DEFAULT 0);
-    CREATE TABLE IF NOT EXISTS progress(episode_id TEXT PRIMARY KEY REFERENCES episodes(id) ON DELETE CASCADE,position REAL NOT NULL,duration REAL NOT NULL,completed INTEGER NOT NULL DEFAULT 0,updated_at INTEGER NOT NULL);
-    CREATE TABLE IF NOT EXISTS favorites(story_id TEXT PRIMARY KEY REFERENCES stories(id) ON DELETE CASCADE);
-    CREATE INDEX IF NOT EXISTS episodes_story ON episodes(story_id,sort_order);
-    CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);`);
+  const db = openDatabase(dataDir);
   if (!db.prepare("SELECT 1 FROM settings WHERE key='initialized'").get()) {
     for (const [i, name] of ['睡前故事', '童话冒险', '国学经典', '科普百科'].entries()) db.prepare('INSERT INTO categories VALUES(?,?,?)').run(crypto.randomUUID(), name, i);
     db.prepare('INSERT INTO settings VALUES(?,?)').run('initialized', '1');
   }
+  if (seedCatalogs) importBundled(db, dataDir);
   const sessions = new Map(), attempts = new Map();
   const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
   const json = (res, status, value) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(value)); };
@@ -34,12 +27,12 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
   function authorized(req) { if (!password) return ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.socket.remoteAddress); const token = /(?:^|;\s*)story_admin=([a-f0-9]+)/.exec(req.headers.cookie || '')?.[1]; if (!token) return false; if ((sessions.get(token) || 0) < Date.now()) { sessions.delete(token); return false; } return true; }
   function catalog(admin = false) {
     const categories = db.prepare('SELECT * FROM categories ORDER BY sort_order,name').all();
-    const stories = db.prepare(`SELECT s.*,c.name category FROM stories s LEFT JOIN categories c ON c.id=s.category_id ${admin ? '' : 'WHERE s.published=1'} ORDER BY s.created_at DESC,s.id`).all();
-    const episodes = db.prepare('SELECT e.*,m.size,m.mime FROM episodes e JOIN media m ON m.id=e.media_id ORDER BY e.sort_order,e.id').all();
-    for (const story of stories) { story.cover_url = story.cover_id ? '/media/' + story.cover_id : null; story.episodes = episodes.filter(e => e.story_id === story.id).map(e => ({ ...e, audio_url: '/media/' + e.media_id })); }
+    const stories = db.prepare(`SELECT s.*,c.name category FROM stories s LEFT JOIN categories c ON c.id=s.category_id ${admin ? '' : 'WHERE s.published=1'} ORDER BY s.series,s.season,s.created_at DESC,s.id`).all();
+    const episodes = db.prepare('SELECT e.*,m.size,m.mime FROM episodes e LEFT JOIN media m ON m.id=e.media_id ORDER BY e.sort_order,e.id').all();
+    for (const story of stories) { story.cover_url = story.cover_id ? '/media/' + story.cover_id : null; story.episodes = episodes.filter(e => e.story_id === story.id).map(e => ({ ...e, audio_url: e.media_id ? '/media/' + e.media_id : null, cover_url:e.cover_id ? '/media/' + e.cover_id : null, has_audio:!!e.media_id })); }
     return { categories, stories };
   }
-  async function removeUnused(id) { if (!id || db.prepare('SELECT 1 FROM episodes WHERE media_id=? UNION ALL SELECT 1 FROM stories WHERE cover_id=?').get(id, id)) return; const file = db.prepare('SELECT * FROM media WHERE id=?').get(id); if (file) { db.prepare('DELETE FROM media WHERE id=?').run(id); await fsp.unlink(path.join(dataDir, 'media', file.filename)).catch(() => {}); } }
+  async function removeUnused(id) { if (!id || db.prepare('SELECT 1 FROM episodes WHERE media_id=? OR cover_id=? UNION ALL SELECT 1 FROM stories WHERE cover_id=?').get(id, id, id)) return; const file = db.prepare('SELECT * FROM media WHERE id=?').get(id); if (file) { db.prepare('DELETE FROM media WHERE id=?').run(id); await fsp.unlink(path.join(dataDir, 'media', file.filename)).catch(() => {}); } }
   function detect(bytes, kind) {
     if (kind === 'image') {
       if (bytes.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) return ['image/png', 'png'];
@@ -109,7 +102,7 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
       if (p === '/api/admin/catalog' && method === 'GET') return json(res, 200, catalog(true));
       if (p === '/api/listening' && method === 'GET') return json(res, 200, { progress: db.prepare('SELECT p.* FROM progress p JOIN episodes e ON e.id=p.episode_id JOIN stories s ON s.id=e.story_id WHERE s.published=1 ORDER BY p.updated_at DESC').all(), favorites: db.prepare('SELECT f.story_id FROM favorites f JOIN stories s ON s.id=f.story_id WHERE s.published=1').all().map(f => f.story_id) });
       if (p === '/api/progress' && method === 'PUT') {
-        const b = await body(req), episode = row('episodes', b.episode_id); if (!row('stories', episode.story_id).published) fail(404, '故事未上架');
+        const b = await body(req), episode = row('episodes', b.episode_id); if (!episode.media_id || !row('stories', episode.story_id).published) fail(404, '故事未上架');
         const duration = numeric(b.duration), position = Math.min(numeric(b.position), duration); if (duration <= 0) fail(400, '音频时长无效');
         const completed = b.completed === true && position >= duration - 1 ? 1 : 0;
         const timestamp = b.updated_at === undefined ? Date.now() : Math.min(numeric(b.updated_at, 1e15), Date.now() + 60000);
@@ -127,21 +120,21 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
       const storyMatch = /^\/api\/admin\/stories\/([^/]+)$/.exec(p);
       if (storyMatch && ['PUT','DELETE'].includes(method)) {
         const story = row('stories', storyMatch[1]);
-        if (method === 'DELETE') { const ids = db.prepare('SELECT media_id FROM episodes WHERE story_id=?').all(story.id).map(e => e.media_id); db.prepare('DELETE FROM stories WHERE id=?').run(story.id); for (const id of [...ids, story.cover_id]) await removeUnused(id); }
-        else { const b = await body(req); if (b.category_id) row('categories', b.category_id); const coverId = b.cover_id === undefined ? story.cover_id : b.cover_id || null; if (coverId) mediaRef(coverId, 'image'); if (b.published && !db.prepare('SELECT 1 FROM episodes WHERE story_id=?').get(story.id)) fail(400, '请先上传至少一集录音再上架'); db.prepare('UPDATE stories SET title=?,description=?,category_id=?,cover_id=?,published=? WHERE id=?').run(label(b.title), String(b.description || '').slice(0, 3000), b.category_id || null, coverId, b.published ? 1 : 0, story.id); if (story.cover_id !== coverId) await removeUnused(story.cover_id); }
+        if (method === 'DELETE') { const ids = db.prepare('SELECT media_id,cover_id FROM episodes WHERE story_id=?').all(story.id).flatMap(e => [e.media_id,e.cover_id]); db.prepare('DELETE FROM stories WHERE id=?').run(story.id); for (const id of [...ids, story.cover_id]) await removeUnused(id); }
+        else { const b = await body(req); if (b.category_id) row('categories', b.category_id); const coverId = b.cover_id === undefined ? story.cover_id : b.cover_id || null; if (coverId) mediaRef(coverId, 'image'); if (b.published && !db.prepare('SELECT 1 FROM episodes WHERE story_id=?').get(story.id)) fail(400, '请先添加至少一个分集再上架'); db.prepare('UPDATE stories SET title=?,description=?,category_id=?,cover_id=?,published=? WHERE id=?').run(label(b.title), String(b.description || '').slice(0, 3000), b.category_id || null, coverId, b.published ? 1 : 0, story.id); if (story.cover_id !== coverId) await removeUnused(story.cover_id); }
         return json(res, 200, { ok: true });
       }
       const episodeList = /^\/api\/admin\/stories\/([^/]+)\/episodes$/.exec(p);
-      if (episodeList && method === 'POST') { row('stories', episodeList[1]); const b = await body(req), id = crypto.randomUUID(); const next = db.prepare('SELECT COALESCE(MAX(sort_order),0)+1 n FROM episodes WHERE story_id=?').get(episodeList[1]).n; db.prepare('INSERT INTO episodes VALUES(?,?,?,?,?,?)').run(id, episodeList[1], label(b.title), mediaRef(b.media_id, 'audio'), next, numeric(b.duration ?? 0)); return json(res, 201, { id }); }
+      if (episodeList && method === 'POST') { row('stories', episodeList[1]); const b = await body(req), id = crypto.randomUUID(); const next = db.prepare('SELECT COALESCE(MAX(sort_order),0)+1 n FROM episodes WHERE story_id=?').get(episodeList[1]).n; db.prepare('INSERT INTO episodes(id,story_id,title,media_id,sort_order,duration,cover_id,subtitle,kind) VALUES(?,?,?,?,?,?,?,?,?)').run(id, episodeList[1], label(b.title), b.media_id ? mediaRef(b.media_id, 'audio') : null, next, numeric(b.duration ?? 0), b.cover_id ? mediaRef(b.cover_id,'image') : null, String(b.subtitle||'').slice(0,500), ['故事','科学揭秘','番外'].includes(b.kind)?b.kind:'故事'); return json(res, 201, { id }); }
       const order = /^\/api\/admin\/stories\/([^/]+)\/order$/.exec(p);
       if (order && method === 'PUT') { row('stories', order[1]); const b = await body(req), ids = db.prepare('SELECT id FROM episodes WHERE story_id=?').all(order[1]).map(e => e.id); if (!Array.isArray(b.ids) || b.ids.length !== ids.length || new Set(b.ids).size !== ids.length || b.ids.some(id => !ids.includes(id))) fail(400, '分集列表已变化，请刷新后重试'); db.exec('BEGIN'); try { b.ids.forEach((id, i) => db.prepare('UPDATE episodes SET sort_order=? WHERE id=?').run(i + 1, id)); db.exec('COMMIT'); } catch (e) { db.exec('ROLLBACK'); throw e; } return json(res, 200, { ok: true }); }
       const episodeMatch = /^\/api\/admin\/episodes\/([^/]+)$/.exec(p);
-      if (episodeMatch && ['PUT','DELETE'].includes(method)) { const e = row('episodes', episodeMatch[1]); if (method === 'DELETE') { db.prepare('DELETE FROM episodes WHERE id=?').run(e.id); if (!db.prepare('SELECT 1 FROM episodes WHERE story_id=?').get(e.story_id)) db.prepare('UPDATE stories SET published=0 WHERE id=?').run(e.story_id); await removeUnused(e.media_id); } else { const b = await body(req); const mediaId = b.media_id ? mediaRef(b.media_id, 'audio') : e.media_id; db.prepare('UPDATE episodes SET title=?,media_id=?,duration=? WHERE id=?').run(label(b.title), mediaId, numeric(b.duration ?? e.duration), e.id); if (mediaId !== e.media_id) { db.prepare('DELETE FROM progress WHERE episode_id=?').run(e.id); await removeUnused(e.media_id); } } return json(res, 200, { ok: true }); }
+      if (episodeMatch && ['PUT','DELETE'].includes(method)) { const e = row('episodes', episodeMatch[1]); if (method === 'DELETE') { db.prepare('DELETE FROM episodes WHERE id=?').run(e.id); if (!db.prepare('SELECT 1 FROM episodes WHERE story_id=?').get(e.story_id)) db.prepare('UPDATE stories SET published=0 WHERE id=?').run(e.story_id); await removeUnused(e.media_id); await removeUnused(e.cover_id); } else { const b = await body(req); if ('expected_media_id' in b && b.expected_media_id !== e.media_id) fail(409, '该分集录音已变化，请刷新后重试'); const mediaId = b.media_id ? mediaRef(b.media_id, 'audio') : e.media_id; const coverId=b.cover_id===undefined?e.cover_id:b.cover_id?mediaRef(b.cover_id,'image'):null; db.prepare('UPDATE episodes SET title=?,media_id=?,duration=?,cover_id=?,subtitle=?,kind=? WHERE id=?').run(label(b.title ?? e.title), mediaId, numeric(b.duration ?? e.duration), coverId, String(b.subtitle ?? e.subtitle).slice(0,500), ['故事','科学揭秘','番外'].includes(b.kind)?b.kind:e.kind, e.id); if (coverId!==e.cover_id) await removeUnused(e.cover_id); if (mediaId !== e.media_id) { db.prepare('DELETE FROM progress WHERE episode_id=?').run(e.id); await removeUnused(e.media_id); } } return json(res, 200, { ok: true }); }
       const unusedMedia = /^\/api\/admin\/media\/([^/]+)$/.exec(p);
       if (unusedMedia && method === 'DELETE') { await removeUnused(unusedMedia[1]); return json(res, 200, { ok: true }); }
       const media = /^\/media\/([^/]+)$/.exec(p);
-      if (media && ['GET','HEAD'].includes(method)) { const file = row('media', media[1]); if (!authorized(req) && !db.prepare('SELECT 1 FROM stories WHERE cover_id=? AND published=1 UNION ALL SELECT 1 FROM episodes e JOIN stories s ON s.id=e.story_id WHERE e.media_id=? AND s.published=1').get(file.id, file.id)) fail(404, '文件不存在'); return await serveFile(req, res, path.join(dataDir, 'media', file.filename), file.mime); }
-      const assets = { '/': 'index.html', '/index.html': 'index.html', '/admin': 'admin.html', '/admin/': 'admin.html', '/admin.html': 'admin.html', '/app.js': 'app.js', '/admin.js': 'admin.js', '/artwork.js': 'artwork.js', '/shared.js': 'shared.js', '/style.css': 'style.css', '/admin.css': 'admin.css' };
+      if (media && ['GET','HEAD'].includes(method)) { const file = row('media', media[1]); if (!authorized(req) && !db.prepare('SELECT 1 FROM stories WHERE cover_id=? AND published=1 UNION ALL SELECT 1 FROM episodes e JOIN stories s ON s.id=e.story_id WHERE (e.media_id=? OR e.cover_id=?) AND s.published=1').get(file.id, file.id, file.id)) fail(404, '文件不存在'); return await serveFile(req, res, path.join(dataDir, 'media', file.filename), file.mime); }
+      const assets = { "/matching.js":"matching.js", '/': 'index.html', '/index.html': 'index.html', '/admin': 'admin.html', '/admin/': 'admin.html', '/admin.html': 'admin.html', '/app.js': 'app.js', '/admin.js': 'admin.js', '/artwork.js': 'artwork.js', '/shared.js': 'shared.js', '/style.css': 'style.css', '/admin.css': 'admin.css' };
       if (assets[p] && ['GET','HEAD'].includes(method)) return await serveFile(req, res, path.join(__dirname, assets[p]), ({ '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' })[path.extname(assets[p])]);
       fail(404, '页面或接口不存在');
     } catch (error) { if (!res.headersSent && !res.destroyed) { const status = error.status || (String(error.message).includes('UNIQUE constraint') ? 409 : 500); if (status === 500) console.error(error); json(res, status, { error: status === 500 ? '服务器处理失败，请稍后重试' : !error.status && status === 409 ? '名称已存在' : error.message }); } }
@@ -153,6 +146,6 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
 if (require.main === module) {
   const host = process.env.HOST || '127.0.0.1';
   if (!['127.0.0.1','::1','localhost'].includes(host) && !process.env.ADMIN_PASSWORD) throw new Error('对外监听前请设置 ADMIN_PASSWORD');
-  createApp().listen(Number(process.env.PORT || 5173), host, () => console.log(`Story house: http://${host}:${process.env.PORT || 5173} · Admin: /admin`));
+  createApp({ seedCatalogs:true }).listen(Number(process.env.PORT || 5173), host, () => console.log(`Story house: http://${host}:${process.env.PORT || 5173} · Admin: /admin`));
 }
 module.exports = { createApp };
