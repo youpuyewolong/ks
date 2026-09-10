@@ -3,7 +3,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { openDatabase } = require('./database');
 
-function importCatalog(db, dataDir, catalogFile, { once = false } = {}) {
+function importCatalog(db, dataDir, catalogFile, { once = false, categoryId: chosenCategory } = {}) {
   const source = JSON.parse(fs.readFileSync(catalogFile, 'utf8').replace(/^\uFEFF/, ''));
   if (!/^\d+$/.test(source.album_id) || !Array.isArray(source.entries) || !source.entries.length || source.complete !== true || source.expected_count !== source.entries.length) throw new Error('仅导入已核对完整的官方目录');
   const marker = 'imported:kaishu:' + source.album_id;
@@ -39,12 +39,15 @@ function importCatalog(db, dataDir, catalogFile, { once = false } = {}) {
       if (!fs.existsSync(target)) { fs.writeFileSync(target,m.bytes,{flag:'wx'}); newFiles.push(target); }
       db.prepare('INSERT OR IGNORE INTO media VALUES(?,?,?,?,?)').run(m.id,m.filename,m.mime,'image',m.bytes.length);
     }
-    const categoryId = db.prepare('SELECT id FROM categories WHERE name=?').get('侦探推理')?.id || crypto.randomUUID();
-    db.prepare('INSERT OR IGNORE INTO categories VALUES(?,?,?)').run(categoryId,'侦探推理',0);
+    const categoryName = source.series === '口袋神探' ? '侦探推理' : '链接导入';
+    const categoryId = chosenCategory || db.prepare('SELECT id FROM categories WHERE name=?').get(categoryName)?.id || crypto.randomUUID();
+    if (chosenCategory) {
+      if (!db.prepare('SELECT id FROM categories WHERE id=?').get(chosenCategory)) throw new Error('所选分类已删除，请重新选择后导入');
+    } else db.prepare('INSERT OR IGNORE INTO categories VALUES(?,?,?)').run(categoryId,categoryName,0);
     let storyId = db.prepare('SELECT id FROM stories WHERE source_album_id=?').get(source.album_id)?.id;
     if (!storyId) {
       storyId = crypto.randomUUID();
-      db.prepare('INSERT INTO stories(id,title,description,category_id,cover_id,published,created_at,source_album_id,series,season,source_url) VALUES(?,?,?,?,?,1,?,?,?,?,?)').run(storyId,source.title,source.description || '科学知识就是探案工具。跟随艾小坡和鸡飞飞，一起寻找线索，解开谜团。',categoryId,coverId,Date.now(),source.album_id,source.series,source.season,source.source_url);
+      db.prepare('INSERT INTO stories(id,title,description,category_id,cover_id,published,created_at,source_album_id,series,season,source_url) VALUES(?,?,?,?,?,1,?,?,?,?,?)').run(storyId,source.title,source.description || '',categoryId,coverId,Date.now(),source.album_id,source.series || '',source.season ?? null,source.source_url);
     } else db.prepare('UPDATE stories SET cover_id=? WHERE id=?').run(coverId,storyId);
     for (const e of entries) {
       const old = db.prepare('SELECT id FROM episodes WHERE story_id=? AND source_id=?').get(storyId,e.id);

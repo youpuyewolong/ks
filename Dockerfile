@@ -1,7 +1,7 @@
 FROM node:24-bookworm-slim
 ENV NODE_ENV=production
 WORKDIR /app
-COPY --chown=node:node package.json server.js database.js import-catalog.js matching.js index.html admin.html app.js admin.js shared.js artwork.js style.css admin.css ./
+COPY --chown=node:node package.json server.js database.js import-catalog.js kaishu-import.js matching.js index.html admin.html app.js admin.js shared.js artwork.js style.css admin.css ./
 COPY --chown=node:node catalogs/kaishu/ ./catalogs/kaishu/
 RUN mkdir -p /app/data && chown node:node /app/data
 USER node

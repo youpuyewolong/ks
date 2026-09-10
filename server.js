@@ -7,8 +7,9 @@ const { Transform } = require('node:stream');
 const { pipeline } = require('node:stream/promises');
 const { openDatabase } = require('./database');
 const { importBundled } = require('./import-catalog');
+const { createImportManager } = require('./kaishu-import');
 
-function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'data'), password = process.env.ADMIN_PASSWORD || '', seedCatalogs = false } = {}) {
+function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'data'), password = process.env.ADMIN_PASSWORD || '', seedCatalogs = false, importFetch = fetch } = {}) {
   fs.mkdirSync(path.join(dataDir, 'media'), { recursive: true });
   const db = openDatabase(dataDir);
   if (!db.prepare("SELECT 1 FROM settings WHERE key='initialized'").get()) {
@@ -16,6 +17,7 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
     db.prepare('INSERT INTO settings VALUES(?,?)').run('initialized', '1');
   }
   if (seedCatalogs) importBundled(db, dataDir);
+  const imports = createImportManager(db, dataDir, { fetchImpl:importFetch });
   const sessions = new Map(), attempts = new Map();
   const fail = (status, message) => { throw Object.assign(new Error(message), { status }); };
   const json = (res, status, value) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(value)); };
@@ -100,6 +102,12 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
       if (p === '/api/admin/logout' && method === 'POST') { const token = /story_admin=([a-f0-9]+)/.exec(req.headers.cookie || '')?.[1]; sessions.delete(token); res.setHeader('Set-Cookie', 'story_admin=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0'); return json(res, 200, { ok: true }); }
       if (p === '/api/catalog' && method === 'GET') return json(res, 200, catalog());
       if (p === '/api/admin/catalog' && method === 'GET') return json(res, 200, catalog(true));
+      if (p === '/api/admin/kaishu-import' && method === 'GET') return json(res, 200, { job:imports.current() });
+      if (p === '/api/admin/kaishu-import' && method === 'POST') {
+        const b = await body(req);
+        if (b.category_id != null && typeof b.category_id !== 'string') fail(400, '分类格式不正确');
+        return json(res, 202, { job:imports.start(b.url, b.category_id || null) });
+      }
       if (p === '/api/listening' && method === 'GET') return json(res, 200, { progress: db.prepare('SELECT p.* FROM progress p JOIN episodes e ON e.id=p.episode_id JOIN stories s ON s.id=e.story_id WHERE s.published=1 ORDER BY p.updated_at DESC').all(), favorites: db.prepare('SELECT f.story_id FROM favorites f JOIN stories s ON s.id=f.story_id WHERE s.published=1').all().map(f => f.story_id) });
       if (p === '/api/progress' && method === 'PUT') {
         const b = await body(req), episode = row('episodes', b.episode_id); if (!episode.media_id || !row('stories', episode.story_id).published) fail(404, '故事未上架');
@@ -140,7 +148,7 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
     } catch (error) { if (!res.headersSent && !res.destroyed) { const status = error.status || (String(error.message).includes('UNIQUE constraint') ? 409 : 500); if (status === 500) console.error(error); json(res, status, { error: status === 500 ? '服务器处理失败，请稍后重试' : !error.status && status === 409 ? '名称已存在' : error.message }); } }
   });
   server.requestTimeout = 30 * 60 * 1000;
-  server.on('close', () => db.close());
+  server.on('close', () => { imports.stop(); db.close(); });
   return server;
 }
 if (require.main === module) {

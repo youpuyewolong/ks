@@ -3,6 +3,9 @@ const form = $('#story-form');
 function confirmDelete(message) { return new Promise(resolve => { $('#confirm-message').textContent = message; const dialog = $('#confirm-dialog'); dialog.showModal(); const done = answer => { dialog.close(); resolve(answer); }; $('#confirm-cancel').onclick = () => done(false); $('#confirm-ok').onclick = () => done(true); dialog.oncancel = event => { event.preventDefault(); done(false); }; }); }
 async function refresh() { catalog = await api('/api/admin/catalog'); render(); }
 function render() {
+  const categoryChoice = $('#import-category').value;
+  $('#import-category').innerHTML = '<option value="">自动分类</option>' + catalog.categories.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');
+  $('#import-category').value = categoryChoice;
   $('#stats').innerHTML = [['故事专辑',catalog.stories.length],['待上传录音',catalog.stories.reduce((n,s)=>n+s.episodes.filter(e=>!e.has_audio).length,0)],['已上架故事',catalog.stories.filter(s=>s.published).length]].map(([text,n])=>`<div class="stat"><span>${text}</span><strong>${n.toString().padStart(2,'0')}</strong></div>`).join('');
   const query = $('#admin-search').value.trim().toLowerCase(), status = $('#status-filter').value;
   const list = catalog.stories.filter(s=>s.title.toLowerCase().includes(query)&&(status==='all'||String(s.published)===status));
@@ -129,5 +132,46 @@ document.addEventListener('click',guarded(async e=>{
 }));
 $('#login-form').onsubmit=guarded(async e=>{e.preventDefault();await api('/api/admin/login','POST',{password:$('#password').value});$('#password').value='';await init()});
 $('#logout').onclick=guarded(async()=>{await api('/api/admin/logout','POST');await init()});
-async function init(){const session=await api('/api/admin/session');$('#login-panel').hidden=session.authenticated;$('#workspace').hidden=!session.authenticated;$('#new-story').disabled=!session.authenticated;$('#logout').hidden=!session.passwordRequired||!session.authenticated;$('#admin-mode').textContent=session.passwordRequired?'管理员模式':'本机管理模式';if(session.authenticated)await refresh()}
+let importTimer = null, importedStory = null;
+function renderImport(job) {
+  const running = job?.status === 'running';
+  $('#start-import').disabled = running;
+  $('#kaishu-url').disabled = running;
+  $('#import-category').disabled = running;
+  $('#import-status').hidden = !job;
+  $('#refresh-import').hidden = true;
+  if (!job) return;
+  if (!$('#kaishu-url').value) $('#kaishu-url').value = 'https://kids.kaishustory.com/h5/ks-detailPage/story?albumId=' + job.album_id;
+  $('#import-title').textContent = job.title || '专辑 ' + job.album_id;
+  $('#import-message').textContent = job.message + (job.stage === 'images' ? ` · ${job.done} / ${job.total} 张图片` : job.status === 'complete' ? ` · ${job.result.entries} 集` : '');
+  const progress = $('#import-progress'); progress.hidden = !running;
+  if (job.total && job.stage === 'images') progress.value = job.done / job.total * 100;
+  else progress.removeAttribute('value');
+  $('#import-status').classList.toggle('import-failed', job.status === 'failed');
+  importedStory = job.result?.story_id || null;
+  $('#open-imported').hidden = !importedStory;
+  $('#start-import').textContent = running ? '正在导入…' : job.status === 'failed' ? '重新获取并导入' : '获取并导入';
+}
+async function pollImport() {
+  clearTimeout(importTimer);
+  try {
+    const {job} = await api('/api/admin/kaishu-import'); renderImport(job);
+    if (job?.status === 'running') importTimer = setTimeout(pollImport, 1500);
+    else if (job?.status === 'complete') await refresh();
+  } catch {
+    $('#import-status').hidden = false;
+    $('#import-message').textContent = '暂时无法查询进度，任务可能仍在运行。请重新查询；若登录过期，请刷新页面登录。';
+    $('#refresh-import').hidden = false;
+  }
+}
+$('#link-import-form').onsubmit = guarded(async event => {
+  event.preventDefault(); $('#start-import').disabled = true;
+  try {
+    const {job} = await api('/api/admin/kaishu-import', 'POST', { url:$('#kaishu-url').value.trim(), category_id:$('#import-category').value || null });
+    $('#kaishu-url').value = ''; renderImport(job); importTimer = setTimeout(pollImport, 1000);
+  } catch (e) { $('#start-import').disabled = false; throw e; }
+});
+$('#refresh-import').onclick = pollImport;
+$('#open-imported').onclick = guarded(async () => { await refresh(); if (catalog.stories.some(s=>s.id===importedStory)) openEditor(importedStory); else toast('该专辑已删除，请重新导入'); });
+async function init(){clearTimeout(importTimer);const session=await api('/api/admin/session');$('#login-panel').hidden=session.authenticated;$('#workspace').hidden=!session.authenticated;$('#new-story').disabled=!session.authenticated;$('#logout').hidden=!session.passwordRequired||!session.authenticated;$('#admin-mode').textContent=session.passwordRequired?'管理员模式':'本机管理模式';if(session.authenticated){await refresh();await pollImport()}}
 guarded(init)();

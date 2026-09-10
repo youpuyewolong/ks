@@ -11,6 +11,7 @@
 !admin.css
 !database.js
 !import-catalog.js
+!kaishu-import.js
 !matching.js
 !catalogs/
 !catalogs/kaishu/
