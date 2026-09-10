@@ -46,17 +46,21 @@ $('#remove-cover').onclick=guarded(async()=>{if(coverUploading)return;if(selecte
 function durationOf(file){return new Promise(resolve=>{const a=new Audio(),url=URL.createObjectURL(file);let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);a.removeAttribute('src');a.load();URL.revokeObjectURL(url);resolve(value)};const timer=setTimeout(()=>finish(0),8000);a.preload='metadata';a.onloadedmetadata=()=>finish(Number.isFinite(a.duration)?a.duration:0);a.onerror=()=>finish(0);a.src=url;});}
 function queueRender(){
   const episodes=currentStory()?.episodes||[];
-  $('#upload-queue').innerHTML=queue.map((q,i)=>`<div class="upload-row ${q.status==='error'?'error':''}"><span title="${esc(q.file.name)}">${esc(q.file.name)}</span><span>${esc(q.message||({waiting:q.reason||'待确认',uploading:'上传中 '+q.percent+'%',done:'✓ 已绑定',error:'上传失败'})[q.status])}</span><select data-target="${i}" aria-label="${esc(q.file.name)}对应分集" ${uploading||q.status==='done'||q.media?'disabled':''}><option value="">请选择对应分集</option><option value="new" ${q.target==='new'?'selected':''}>＋ 新建分集（使用文件名）</option>${episodes.map(e=>`<option value="${e.id}" ${q.target===e.id?'selected':''}>${esc(e.title)}${e.has_audio?' · 替换已有录音':''}</option>`).join('')}</select><progress max="100" value="${q.percent}"></progress></div>`).join('');
+  $('#upload-queue').innerHTML=queue.map((q,i)=>`<div class="upload-row ${q.status==='error'?'error':!q.target||q.status==='skipped'?'unmatched':''}"><span title="${esc(q.file.name)}">${esc(q.file.name)}</span><span>${esc(q.message||({waiting:q.target?q.reason||'待确认':'未上传 · 未匹配，请手动选择',uploading:'上传中 '+q.percent+'%',done:'✓ 已绑定',error:'上传失败',skipped:'未上传 · 已跳过（未匹配）'})[q.status])}</span><select data-target="${i}" aria-label="${esc(q.file.name)}对应分集" ${uploading||q.status==='done'||q.media?'disabled':''}><option value="">请选择对应分集</option><option value="new" ${q.target==='new'?'selected':''}>＋ 新建分集（使用文件名）</option>${episodes.map(e=>`<option value="${e.id}" ${q.target===e.id?'selected':''}>${esc(e.title)}${e.has_audio?' · 替换已有录音':''}</option>`).join('')}</select><progress max="100" value="${q.percent}"></progress></div>`).join('');
+  const skipped=queue.filter(q=>q.status==='skipped'||q.status==='waiting'&&!q.target).length;
   const success=queue.filter(q=>q.status==='done').length,failed=queue.filter(q=>q.status==='error').length;
-  $('#upload-summary').textContent=queue.length?`${success} / ${queue.length} 集已绑定${failed?' · '+failed+' 集失败':''}`:'';
+  $('#upload-summary').textContent=queue.length?`${success} / ${queue.length} 集已绑定${failed?' · '+failed+' 个失败':''}${skipped?' · '+skipped+' 个未匹配，未上传':''}`:'';
   $('#retry-failed').hidden=!failed||uploading;
-  $('#start-uploads').hidden=uploading||!queue.some(q=>q.status==='waiting');
+  $('#start-uploads').hidden=uploading||!queue.some(q=>q.status==='waiting'&&q.target);
+  $('#start-uploads').textContent='上传已选择的 '+queue.filter(q=>q.status==='waiting'&&q.target).length+' 个文件';
 }
-$('#upload-queue').onchange=e=>{if(e.target.dataset.target!==undefined){const q=queue[Number(e.target.dataset.target)];q.target=e.target.value;q.reason='手动指定';}};
+$('#upload-queue').onchange=e=>{if(e.target.dataset.target!==undefined){const q=queue[Number(e.target.dataset.target)];q.target=e.target.value;q.reason=q.target?'手动指定':'未匹配';if(q.status==='skipped')q.status='waiting';q.message='';queueRender();}};
 async function runQueue(){
   if(uploading||coverUploading)return;
-  const waiting=queue.filter(q=>q.status==='waiting'),targets=waiting.map(q=>q.target).filter(t=>t!=='new');
-  if(waiting.some(q=>!q.target)){toast('请为每个文件选择对应分集');return}
+  for(const q of queue)if(q.status==='waiting'&&!q.target)q.status='skipped';
+  queueRender();
+  const waiting=queue.filter(q=>q.status==='waiting'&&q.target),targets=waiting.map(q=>q.target).filter(t=>t!=='new');
+  if(!waiting.length){toast('没有可上传的文件，未匹配文件已标记为未上传');return}
   if(new Set(targets).size!==targets.length){toast('多个文件指向同一分集，请调整对应关系');return}
   const replace=waiting.filter(q=>currentStory().episodes.find(e=>e.id===q.target)?.has_audio);
   if(replace.length && !await confirmDelete(`将替换 ${replace.length} 集已有录音，并重置这些分集的收听进度。确认继续？`))return;
@@ -81,7 +85,13 @@ async function addFiles(files,directTarget=null){
   if(!editing||uploading||coverUploading)return;
   const existing=new Set(queue.filter(q=>q.status!=='done').map(q=>[q.file.name,q.file.size,q.file.lastModified].join(':')));
   for(const file of [...files].sort((a,b)=>a.name.localeCompare(b.name,'zh-CN',{numeric:true}))){
-    const key=[file.name,file.size,file.lastModified].join(':');if(existing.has(key))continue;existing.add(key);
+    const key=[file.name,file.size,file.lastModified].join(':');
+    if(existing.has(key)){
+      const pending=queue.find(q=>q.status!=='done'&&[q.file.name,q.file.size,q.file.lastModified].join(':')===key);
+      if(directTarget&&pending&&!pending.media){pending.target=directTarget;pending.reason='指定分集';pending.status='waiting';pending.message='';}
+      continue;
+    }
+    existing.add(key);
     const match=StoryMatching.matchEpisode(file.name,currentStory().episodes);
     queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id?'new':''),reason:directTarget?'指定分集':match.reason,status:'waiting',message:'',percent:0});
   }
