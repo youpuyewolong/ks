@@ -21,21 +21,22 @@ function imageUrl(value) {
   return url.href;
 }
 // Each request is fixed to the official API/CDNs; redirects cannot reach other hosts.
-async function readRemote(url, { fetchImpl = fetch, signal, max = 8 * 1024 * 1024 } = {}) {
+async function readRemote(url, { fetchImpl = fetch, signal, max = 8 * 1024 * 1024, label = '官方文件' } = {}) {
+  const tooLarge = size => new Error(`${label}超过导入大小限制（${(size/1024/1024).toFixed(2)} MB，上限 ${max/1024/1024} MB），未写入数据库`);
   const requestSignal = AbortSignal.any([signal || new AbortController().signal, AbortSignal.timeout(30000)]);
   let response;
   try { response = await fetchImpl(url, { signal:requestSignal, redirect:'error', headers:{ Accept:'application/json,image/webp,image/*', Referer:'https://kids.kaishustory.com/' } }); }
   catch { throw new Error('连接官方服务器失败或超时，请稍后重试'); }
   if (!response.ok) { await response.body?.cancel(); throw new Error(`官方服务器返回 HTTP ${response.status}，请稍后重试`); }
-  if (Number(response.headers.get('content-length')) > max) { await response.body?.cancel(); throw new Error('官方文件超过导入大小限制'); }
+  if (Number(response.headers.get('content-length')) > max) { await response.body?.cancel(); throw tooLarge(Number(response.headers.get('content-length'))); }
   let size = 0; const chunks = [];
   try {
-    for await (const chunk of response.body) { size += chunk.length; if (size > max) throw new Error('官方文件超过导入大小限制'); chunks.push(chunk); }
+    for await (const chunk of response.body) { size += chunk.length; if (size > max) throw tooLarge(size); chunks.push(chunk); }
   } catch (e) { if (requestSignal.aborted) throw new Error('下载超时或任务已停止，请重试'); throw e; }
   return Buffer.concat(chunks);
 }
 async function apiData(endpoint, albumId, options) {
-  const bytes = await readRemote(`${API}${endpoint}?albumId=${albumId}`, options);
+  const bytes = await readRemote(`${API}${endpoint}?albumId=${albumId}`, {max:32*1024*1024, ...options, label:`专辑 ${albumId} 的${endpoint.includes('get_info')?'介绍资料':'分集目录'}`});
   let result; try { result = JSON.parse(bytes); } catch { throw new Error('官方接口响应格式已变化，无法导入'); }
   if (result.code !== 0 || !result.data) throw new Error(result.code === 10003003 ? '此专辑的官方资料需要登录，当前无法通过公开链接导入' : '官方暂未提供此专辑资料，请检查链接或稍后重试');
   return result.data;
@@ -76,7 +77,7 @@ async function fetchCatalog(parsed, options = {}) {
 async function downloadCatalog(parsed, directory, options = {}, progress = () => {}) {
   const catalog = options.catalog ? structuredClone(options.catalog) : await fetchCatalog(parsed, options);
   const urls = [...new Set([catalog.cover, ...catalog.entries.map(e => e.cover)])];
-  const files = new Map(); let cursor = 0, done = 0, totalBytes = 0;
+  const files = new Map(); let cursor = 0, done = 0, totalBytes = 0, firstError;
   progress({ stage:'images', title:catalog.title, episodes:catalog.entries.length, done, total:urls.length, message:'正在下载专辑和分集封面' });
   const cancellation = new AbortController();
   const signal = AbortSignal.any([options.signal || new AbortController().signal, cancellation.signal]);
@@ -84,16 +85,16 @@ async function downloadCatalog(parsed, directory, options = {}, progress = () =>
     try {
       while (cursor < urls.length) {
         signal.throwIfAborted(); const index = cursor++, url = urls[index];
-        const bytes = await readRemote(url, { ...options, signal });
+        const label = url === catalog.cover ? `专辑「${catalog.title}」封面` : `分集「${catalog.entries.find(e=>e.cover===url).title}」封面`;
+        const bytes = await readRemote(url, { max:20*1024*1024, ...options, signal, label });
         totalBytes += bytes.length;
         if (totalBytes > 250 * 1024 * 1024) throw new Error('专辑图片总大小超过 250 MB，未导入');
         const file = `image-${index}.bin`; await fs.writeFile(path.join(directory, file), bytes); files.set(url, file);
         progress({ done:++done });
       }
-    } catch (e) { cancellation.abort(); throw e; }
+    } catch (e) { firstError ||= e; cancellation.abort(); throw e; }
   }));
-  const failed = workers.find(r => r.status === 'rejected' && r.reason.name !== 'AbortError');
-  if (failed) throw failed.reason;
+  if (firstError) throw firstError;
   signal.throwIfAborted();
   catalog.cover_file = files.get(catalog.cover);
   for (const entry of catalog.entries) entry.cover_file = files.get(entry.cover);

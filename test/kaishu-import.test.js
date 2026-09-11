@@ -122,3 +122,15 @@ test('预览不下载图片或写库；确认仅导入所选分集，后续补�
     assert.throws(()=>manager.confirm(third.id,['cat1']),/失效/);
   }finally{manager.stop();db.close();fs.rmSync(dir,{recursive:true,force:true})}
 });
+test('大封面使用独立上限，超限错误明确指出封面而非被并发取消覆盖',async()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'ks-large-')),db=openDatabase(dir);
+  try{
+    const large=Buffer.concat([png,Buffer.alloc(9*1024*1024)]);
+    const manager=createImportManager(db,dir,{fetchImpl:async url=>url.startsWith('https://cdn.')?new Response(large):fakeFetch()(url)});
+    manager.start(link);let end=await finish(manager);assert.equal(end.status,'complete',end.message);
+    const broken=createImportManager(db,dir,{fetchImpl:async url=>url.startsWith('https://cdn.')?new Response('',{headers:{'content-length':String(21*1024*1024)}}):fakeFetch()(url)});
+    broken.start(link);end=await finish(broken);assert.equal(end.status,'failed');assert.match(end.message,/专辑「神奇图书馆 第2季」封面.*21.00 MB.*20 MB/);
+    assert.equal(db.prepare('SELECT count(*) n FROM episodes').get().n,2);
+    await assert.rejects(readRemote(cover,{max:3,label:'分集「测试」封面',fetchImpl:async()=>new Response('1234')}),/分集「测试」封面.*大小限制/);
+  }finally{db.close();fs.rmSync(dir,{recursive:true,force:true})}
+});
