@@ -4,8 +4,22 @@ try{autoplay=localStorage.getItem('story-autoplay')!=='false'}catch{}
 $('#hero-art').innerHTML=art('bear','#f3e7cf',true);
 function progressFor(id){return listening.progress.find(p=>p.episode_id===id)}
 function latestFor(story){return listening.progress.filter(p=>story.episodes.some(e=>e.id===p.episode_id)).sort((a,b)=>b.updated_at-a.updated_at)[0]}
-function playable(story){return story.episodes.filter(e=>e.has_audio)}
-function resumeEpisode(story){const episodes=playable(story),p=latestFor(story);if(!p)return episodes[0];const index=episodes.findIndex(e=>e.id===p.episode_id);return index<0?episodes[0]:p.completed?(episodes[index+1]||episodes[0]):episodes[index]}
+let storyKinds={};
+try{const saved=JSON.parse(localStorage.getItem('story-kind-filters')||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))storyKinds=saved}catch{}
+function kindFor(story){const kind=storyKinds[story.id];return typeof kind==='string'&&story.episodes.some(e=>(e.kind||'故事')===kind)?kind:''}
+function filteredEpisodes(story){const kind=kindFor(story);return story.episodes.filter(e=>!kind||(e.kind||'故事')===kind)}
+function playable(story){return filteredEpisodes(story).filter(e=>e.has_audio)}
+function latestPlayableFor(story){const ids=new Set(playable(story).map(e=>e.id));return listening.progress.filter(p=>ids.has(p.episode_id)).sort((a,b)=>b.updated_at-a.updated_at)[0]}
+function selectKind(kind){
+  const story=catalog.stories.find(s=>s.id===detailId);if(!story)return;
+  storyKinds[story.id]=kind;detailKind=kindFor(story);
+  try{localStorage.setItem('story-kind-filters',JSON.stringify(storyKinds))}catch{}
+  if(current?.story.id===story.id&&!playable(story).some(e=>e.id===current.episode.id)){
+    persist().catch(()=>{});audio.pause();toast('已切换收听类型，请选择列表中的分集开始播放');
+  }
+  renderDetail();updateTransport();
+}
+function resumeEpisode(story){const episodes=playable(story),p=latestPlayableFor(story);if(!p)return episodes[0];const index=episodes.findIndex(e=>e.id===p.episode_id);return index<0?episodes[0]:p.completed?(episodes[index+1]||episodes[0]):episodes[index]}
 function updateAutoplay(){$('#autoplay').textContent='连播 '+(autoplay?'开':'关');$('#autoplay').setAttribute('aria-pressed',String(autoplay))}
 function render(){
   $('#library-count').textContent=catalog.stories.length;
@@ -27,17 +41,17 @@ function renderFeatured(){const s=catalog.stories.find(s=>s.season===7)||catalog
 function renderDetail(){
   const s=catalog.stories.find(s=>s.id===detailId);if(!s)return;
   $('#detail-cover').innerHTML=cover(s);$('#detail-category').textContent=(s.category||'故事专辑')+' · '+(s.series||'精选故事');$('#detail-title').textContent=s.title;$('#detail-description').textContent=s.description;
-  $('#detail-count').textContent=s.episodes.length+' 条';const available=playable(s).length;
-  $('#detail-resume').textContent=!available?'录音准备中':latestFor(s)?'▶ 继续收听':'▶ 播放全部';$('#detail-resume').disabled=!available;
-  $('#detail-availability').textContent=`共 ${s.episodes.length} 条 · ${available} 条可收听${available<s.episodes.length?' · 其余录音准备中':''}`;
+  detailKind=kindFor(s);const filtered=filteredEpisodes(s);$('#detail-count').textContent=filtered.length+' 条';const available=playable(s).length;
+  $('#detail-resume').textContent=!available?'录音准备中':latestPlayableFor(s)?'▶ 继续收听':'▶ 播放'+(detailKind||'全部');$('#detail-resume').disabled=!available;
+  $('#detail-availability').textContent=`${detailKind||'全部类型'} · ${filtered.length} 条 · ${available} 条可收听 · 连播仅播放当前类型（按正序）${available<filtered.length?' · 其余录音准备中':''}`;
   $('#season-tabs').innerHTML=catalog.stories.filter(x=>x.series&&x.series===s.series).map(x=>`<button data-story="${x.id}" class="${x.id===s.id?'selected':''}">第 ${x.season} 季</button>`).join('');
-  $('#detail-filters').innerHTML=['','故事','科学揭秘','番外'].map(k=>`<button data-kind-filter="${k}" class="${detailKind===k?'selected':''}">${k==='故事'?'我是故事':k||'全部'}</button>`).join('');
-  let episodes=s.episodes.filter(e=>!detailKind||e.kind===detailKind);if(detailReverse)episodes=episodes.slice().reverse();
+  $('#detail-filters').innerHTML=['',...new Set(s.episodes.map(e=>e.kind||'故事'))].map(k=>`<button data-kind-filter="${esc(k)}" aria-pressed="${detailKind===k}" class="${detailKind===k?'selected':''}">${esc(k||'全部')}</button>`).join('');
+  let episodes=filtered;if(detailReverse)episodes=episodes.slice().reverse();
   $('#detail-episodes').innerHTML=episodes.map(e=>{const p=progressFor(e.id);return `<button class="listen-episode ${current?.episode.id===e.id?'playing':''} ${e.has_audio?'':'unavailable'}" data-play="${e.id}" aria-disabled="${!e.has_audio}"><span class="episode-image">${cover(e.cover_url?e:s)}</span><span class="episode-name"><strong>${esc(e.title)}</strong><small>${esc(e.subtitle||e.kind)}</small><span class="episode-list-meta">◷ ${format(e.duration||p?.duration)} <i>·</i> ${!e.has_audio?'录音准备中':p?(p.completed?'已听完':'听到 '+format(p.position)):'可收听'}</span></span><span class="episode-play">${e.has_audio?'▶':'待上传'}</span></button>`}).join('')||'<div class="empty">此分类暂无分集</div>';
 }
-function openStory(id){detailId=id;detailKind='';detailReverse=false;$('#detail-order').textContent='正序 ↑';renderDetail();$('#story-detail').hidden=false;document.body.classList.add('album-open');window.scrollTo({top:0,behavior:'smooth'})}
+function openStory(id){detailId=id;detailReverse=false;$('#detail-order').textContent='正序 ↑';renderDetail();$('#story-detail').hidden=false;document.body.classList.add('album-open');window.scrollTo({top:0,behavior:'smooth'})}
 function closeDetail(){detailId=null;$('#story-detail').hidden=true;document.body.classList.remove('album-open')}
-$('#detail-filters').onclick=e=>{const b=e.target.closest('[data-kind-filter]');if(b){detailKind=b.dataset.kindFilter;renderDetail()}};
+$('#detail-filters').onclick=e=>{const b=e.target.closest('[data-kind-filter]');if(b){selectKind(b.dataset.kindFilter)}};
 $('#detail-order').onclick=()=>{detailReverse=!detailReverse;$('#detail-order').textContent=detailReverse?'倒序 ↓':'正序 ↑';renderDetail()};
 
 function snapshot(completed=false){if(!current||!ready||!Number.isFinite(audio.duration)||audio.duration<=0)return null;return {episode_id:current.episode.id,position:audio.currentTime,duration:audio.duration,completed:completed||audio.ended,updated_at:Date.now()}}
@@ -52,8 +66,8 @@ async function playEpisode(id,fromStart=false){
   try{await audio.play()}catch(e){if(token===generation&&e.name!=='AbortError')toast(e.name==='NotAllowedError'?'点一下播放，继续收听':'这集暂时无法播放，请检查录音格式')}
   renderDetail();updateTransport();
 }
-async function toggle(){if(!current){toast('先选一个想听的故事');return}if(audio.paused){try{await audio.play()}catch{toast('无法播放这集录音，请检查网络或音频格式')}}else audio.pause()}
-function updateTransport(){$('#play').textContent=audio.paused?'▶':'Ⅱ';$('#play').setAttribute('aria-label',audio.paused?'播放':'暂停');const i=current?playable(current.story).findIndex(e=>e.id===current.episode.id):-1;$('#previous').disabled=i<=0;$('#next').disabled=!current||i>=playable(current.story).length-1}
+async function toggle(){if(!current){toast('先选一个想听的故事');return}if(audio.paused){if(!playable(current.story).some(e=>e.id===current.episode.id)){const next=resumeEpisode(current.story);if(next)return playEpisode(next.id);toast('当前类型暂无可收听录音');return}try{await audio.play()}catch{toast('无法播放这集录音，请检查网络或音频格式')}}else audio.pause()}
+function updateTransport(){$('#play').textContent=audio.paused?'▶':'Ⅱ';$('#play').setAttribute('aria-label',audio.paused?'播放':'暂停');const i=current?playable(current.story).findIndex(e=>e.id===current.episode.id):-1;$('#previous').disabled=i<=0;$('#next').disabled=!current||!playable(current.story).length||i>=playable(current.story).length-1}
 function nextEpisode(direction=1){if(!current)return;const episodes=playable(current.story),i=episodes.findIndex(e=>e.id===current.episode.id),next=episodes[i+direction];if(next)return playEpisode(next.id,true);toast(direction>0?'已经是最后一集了':'已经是第一集了')}
 function resetSleep() {clearTimeout(sleepTimer);stopAt=0;stopAfterEpisode=false;$('#sleep').value='0'}
 function stopForSleep(){resetSleep();audio.pause();toast('时间到了，晚安，好梦。')}
@@ -69,7 +83,7 @@ audio.addEventListener('play',updateTransport);
 audio.addEventListener('pause',()=>{updateTransport();if(!switching){persist().catch(()=>{});render()}});
 audio.addEventListener('error',()=>{switching=false;ready=false;updateTransport();toast('录音加载失败，请检查连接或在后台检查音频文件')});
 audio.addEventListener('timeupdate',()=>{if(stopAt&&Date.now()>=stopAt){stopForSleep();return}$('#elapsed').textContent=format(audio.currentTime);$('#seek').value=audio.duration?audio.currentTime/audio.duration*100:0;if(Date.now()-lastSave>5000){persist().catch(()=>{});lastSave=Date.now()}});
-audio.addEventListener('ended',()=>{persist(true).catch(()=>{});render();if(stopAfterEpisode||stopAt&&Date.now()>=stopAt){stopForSleep();return}if(autoplay){const i=playable(current.story).findIndex(e=>e.id===current.episode.id);if(i<playable(current.story).length-1)nextEpisode().catch(e=>toast(e.message));else toast('这个故事听完啦，去发现下一个吧。')}});
+audio.addEventListener('ended',()=>{persist(true).catch(()=>{});render();if(stopAfterEpisode||stopAt&&Date.now()>=stopAt){stopForSleep();return}if(autoplay){const i=playable(current.story).findIndex(e=>e.id===current.episode.id);if(i<playable(current.story).length-1)nextEpisode().catch(e=>toast(e.message));else toast('当前类型已听完啦。')}});
 window.addEventListener('pagehide',()=>persist(false,true));document.addEventListener('visibilitychange',()=>{if(document.hidden)persist(false,true);else if(stopAt&&Date.now()>=stopAt)stopForSleep()});
 document.addEventListener('click',guarded(async e=>{const b=e.target.closest('button');if(!b)return;const d=b.dataset;if(d.page){closeDetail();page=d.page;category='';$('#search').value='';render()}if(d.category!==undefined){category=d.category;render()}if(d.story)openStory(d.story);if(d.play)await playEpisode(d.play);if(d.resume){const s=catalog.stories.find(s=>s.id===d.resume),episode=resumeEpisode(s);if(episode)await playEpisode(episode.id)}if(d.favorite){const liked=listening.favorites.includes(d.favorite);await api('/api/favorites/'+d.favorite,liked?'DELETE':'PUT');listening.favorites=liked?listening.favorites.filter(id=>id!==d.favorite):[...listening.favorites,d.favorite];render()}}));
 $('#all-history').onclick=()=>{page='history';category='';render()};$('#search').oninput=render;$('#hero-button').onclick=()=>{const s=catalog.stories.find(s=>s.season===7)||catalog.stories[0];if(s)openStory(s.id);else $('.catalog').scrollIntoView({behavior:'smooth'})};
