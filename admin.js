@@ -16,7 +16,7 @@ function render() {
 function currentStory() { return catalog.stories.find(s=>s.id===editing); }
 function renderCover() { $('#cover-preview').innerHTML = selectedCover ? `<img src="/media/${esc(selectedCover)}" alt="故事封面预览">` : art('audio','#e7e9d7'); }
 function openEditor(id = null) {
-  editing = id; queue = []; selectedEpisodes.clear(); $('#episode-kind-filter').value='all'; $('#episode-search').value=''; $('#episode-status').value='all'; $('#start-uploads').hidden=true; $('#upload-queue').innerHTML=''; $('#upload-summary').textContent=''; $('#retry-failed').hidden=true;
+  editing = id; queue = []; resetUploadBoard(); selectedEpisodes.clear(); $('#episode-kind-filter').value='all'; $('#episode-search').value=''; $('#episode-status').value='all'; $('#start-uploads').hidden=true; $('#upload-queue').innerHTML=''; $('#upload-summary').textContent=''; $('#retry-failed').hidden=true;
   const s = currentStory(); selectedCover=s?.cover_id||null; form.reset();
   $('#story-category').innerHTML='<option value="">未分类</option>'+catalog.categories.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
   form.elements.title.value=s?.title||''; form.elements.description.value=s?.description||''; form.elements.category_id.value=s?.category_id||''; form.elements.published.checked=!!s?.published;
@@ -46,23 +46,21 @@ $('#cover-file').onchange=guarded(async event=>{
 $('#remove-cover').onclick=guarded(async()=>{if(coverUploading)return;if(selectedCover&&selectedCover!==currentStory()?.cover_id)await api('/api/admin/media/'+selectedCover,'DELETE');selectedCover=null;renderCover()});
 function durationOf(file){return new Promise(resolve=>{const a=new Audio(),url=URL.createObjectURL(file);let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);a.removeAttribute('src');a.load();URL.revokeObjectURL(url);resolve(value)};const timer=setTimeout(()=>finish(0),8000);a.preload='metadata';a.onloadedmetadata=()=>finish(Number.isFinite(a.duration)?a.duration:0);a.onerror=()=>finish(0);a.src=url;});}
 function queueRender(){
-  const episodes=currentStory()?.episodes||[];
-  $('#upload-queue').innerHTML=queue.map((q,i)=>`<div class="upload-row ${q.status==='error'?'error':!q.target||q.status==='skipped'?'unmatched':''}"><span title="${esc(q.file.name)}">${esc(q.file.name)}</span><span>${esc(q.message||({waiting:q.target?q.reason||'待确认':'未上传 · 未匹配，请手动选择',uploading:'上传中 '+q.percent+'%',done:'✓ 已绑定',error:'上传失败',skipped:'未上传 · 已跳过（未匹配）'})[q.status])}</span><select data-target="${i}" aria-label="${esc(q.file.name)}对应分集" ${uploading||q.status==='done'||q.media?'disabled':''}><option value="">请选择对应分集</option><option value="new" ${q.target==='new'?'selected':''}>＋ 新建分集（使用文件名）</option>${episodes.map(e=>`<option value="${e.id}" ${q.target===e.id?'selected':''}>${esc(e.title)}${e.has_audio?' · 替换已有录音':''}</option>`).join('')}</select><progress max="100" value="${q.percent}"></progress></div>`).join('');
-  const skipped=queue.filter(q=>q.status==='skipped'||q.status==='waiting'&&!q.target).length;
-  const success=queue.filter(q=>q.status==='done').length,failed=queue.filter(q=>q.status==='error').length;
-  $('#upload-summary').textContent=queue.length?`${success} / ${queue.length} 集已绑定${failed?' · '+failed+' 个失败':''}${skipped?' · '+skipped+' 个未匹配，未上传':''}`:'';
-  $('#retry-failed').hidden=!failed||uploading;
-  $('#start-uploads').hidden=uploading||!queue.some(q=>q.status==='waiting'&&q.target);
-  $('#start-uploads').textContent='上传已选择的 '+queue.filter(q=>q.status==='waiting'&&q.target).length+' 个文件';
+  const states=StoryMatching.analyzeQueue(queue,currentStory()?.episodes||[]);
+  renderUploadBoard(states);
+  const ready=states.filter(s=>s.ready).length,issues=states.filter(s=>s.issue).length,done=states.filter(s=>s.state==='done').length,discarded=states.filter(s=>s.state==='discarded').length;
+  $('#upload-summary').textContent=queue.length?`已上传 ${done} · 可上传 ${ready} · 问题未上传 ${issues} · 已舍弃 ${discarded}`:'';
+  $('#retry-failed').hidden=uploading||!queue.some(q=>q.status==='error');
+  $('#start-uploads').hidden=uploading||!ready;
+  $('#start-uploads').textContent='上传匹配正常的 '+ready+' 个文件';
 }
-$('#upload-queue').onchange=e=>{if(e.target.dataset.target!==undefined){const q=queue[Number(e.target.dataset.target)];q.target=e.target.value;q.reason=q.target?'手动指定':'未匹配';if(q.status==='skipped')q.status='waiting';q.message='';queueRender();}};
 async function runQueue(){
-  if(uploading||coverUploading)return;
+  if(uploading||coverUploading||batchBusy)return;
   for(const q of queue)if(q.status==='waiting'&&!q.target)q.status='skipped';
   queueRender();
-  const waiting=queue.filter(q=>q.status==='waiting'&&q.target),targets=waiting.map(q=>q.target).filter(t=>t!=='new');
+  const states=StoryMatching.analyzeQueue(queue,currentStory().episodes);
+  const waiting=states.filter(s=>s.ready).map(s=>queue[s.index]);
   if(!waiting.length){toast('没有可上传的文件，未匹配文件已标记为未上传');return}
-  if(new Set(targets).size!==targets.length){toast('多个文件指向同一分集，请调整对应关系');return}
   const replace=waiting.filter(q=>currentStory().episodes.find(e=>e.id===q.target)?.has_audio);
   if(replace.length && !await confirmDelete(`将替换 ${replace.length} 集已有录音，并重置这些分集的收听进度。确认继续？`))return;
   uploading=true;$('#choose-audio').disabled=true;$('#close-editor').disabled=true;$('#save-story').disabled=true;queueRender();
@@ -94,7 +92,7 @@ async function addFiles(files,directTarget=null){
     }
     existing.add(key);
     const match=StoryMatching.matchEpisode(file.name,currentStory().episodes);
-    queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id?'new':''),reason:directTarget?'指定分集':match.reason,status:'waiting',message:'',percent:0});
+    queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id?'new':''),reason:directTarget?'指定分集':match.reason,candidates:match.candidates||[],status:'waiting',message:'',percent:0});
   }
   queueRender();
   if(directTarget && queue.filter(q=>q.status==='waiting').length===1)await runQueue();

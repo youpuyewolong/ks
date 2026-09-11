@@ -34,3 +34,26 @@ test('小数排序不回退到主线集数，重名与标题冲突不自动绑�
   assert.equal(matchEpisode('00 主题曲.mp3',[{id:'a',title:'歌1',subtitle:'主题曲'},{id:'b',title:'歌2',subtitle:'主题曲'}]).id,null);
   assert.equal(matchEpisode('01.1 同名.mp3',[{id:'a',title:'同名'},{id:'b',title:'同名'}]).id,null);
 });
+const {analyzeQueue,orderFiles}=require('../matching');
+test('多候选保留具体分集，标题冲突列出双方',()=>{
+  const episodes=[{id:'a',title:'第1集：谜案'},{id:'b',title:'第2集：追踪'}];
+  assert.deepEqual(matchEpisode('第1集：追踪.mp3',episodes).candidates,['a','b']);
+  assert.deepEqual(matchEpisode('01.1 同名.mp3',[{id:'x',title:'同名'},{id:'y',title:'同名'}]).candidates,['x','y']);
+});
+test('重复占用列出全部同伴，舍弃或改绑解除冲突，仅有效目标可重试',()=>{
+  const episodes=[{id:'a'},{id:'b'}];
+  const q=[{target:'a',status:'waiting'},{target:'a',status:'waiting'},{target:'a',status:'waiting'},{target:'',candidates:['a','b']},{target:'gone',status:'error'}];
+  let s=analyzeQueue(q,episodes);
+  assert.deepEqual(s[0].peers,[1,2]);assert.equal(s.filter(x=>x.ready).length,0);assert.equal(s[3].state,'ambiguous');assert.equal(s[4].state,'missing');
+  q[1].status='discarded';q[2].target='b';s=analyzeQueue(q,episodes);
+  assert.equal(s[0].ready,true);assert.equal(s[1].ready,false);assert.equal(s[2].ready,true);
+  q[0].status='done';q[2].status='error';s=analyzeQueue(q,episodes);
+  assert.equal(s[0].ready,false);assert.equal(s[2].ready,true);
+});
+test('文件优先跟随目录与候选位置，剩余文件自然排序',()=>{
+  const episodes=[{id:'b',title:'第2集'},{id:'a',title:'第1集'}];
+  const q=[{target:'a',file:{name:'01.mp3'}},{candidates:['b'],file:{name:'候选.mp3'}},{file:{name:'未知10.mp3'}},{file:{name:'未知2.mp3'}}];
+  assert.deepEqual(orderFiles(q,episodes),[1,0,3,2]);
+  assert.deepEqual(orderFiles(q,episodes,'added'),[0,1,2,3]);
+  assert.deepEqual(orderFiles(q,episodes,'name').filter(i=>i>=2),[3,2]);
+});

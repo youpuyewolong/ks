@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
-    "check": "node --check app.js && node --check admin.js && node --check shared.js && node --check artwork.js && node --check server.js && node --check database.js && node --check import-catalog.js && node --check kaishu-import.js && node --check matching.js",
+    "check": "node --check app.js && node --check admin.js && node --check upload-board.js && node --check shared.js && node --check artwork.js && node --check server.js && node --check database.js && node --check import-catalog.js && node --check kaishu-import.js && node --check matching.js",
     "test": "node --test test/*.test.js",
     "import:catalog": "node --env-file-if-exists=.env import-catalog.js"
   }

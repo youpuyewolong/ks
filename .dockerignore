@@ -16,3 +16,5 @@
 !catalogs/
 !catalogs/kaishu/
 !catalogs/kaishu/**
+
+!upload-board.js
