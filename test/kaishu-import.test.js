@@ -36,7 +36,15 @@ test('展开全部分组，拒绝缺集、重复编号及未知结构', () => {
   assert.throws(()=>normalizeCatalog(info,{...list,moduleList:[list.moduleList[0]]},parsed),/数量/);
   assert.throws(()=>normalizeCatalog(info,{showType:2,mediaList:[media[0],media[0]]},parsed),/编号/);
   assert.throws(()=>normalizeCatalog(info,{showType:9},parsed),/结构/);
-  assert.throws(()=>normalizeCatalog(info,{...list,moduleList:[{mediaCount:2,mediaList:[media[0]]}]},parsed),/分组/);
+  assert.throws(()=>normalizeCatalog(info,{...list,moduleList:[{mediaCount:2,mediaList:[media[0]]}]},parsed),/数量/);
+  assert.throws(()=>normalizeCatalog(info,{...list,moduleList:[{mediaCount:2}]},parsed),/分组/);
+});
+test('分组标注数量过时，但全专辑数量及唯一编号完整时允许导入',()=>{
+  const parsed=parseAlbumLink(link);
+  const stale={showType:1,moduleList:[{mediaCount:2,mediaList:[media[0]]},{mediaCount:1,mediaList:[media[1]]}]};
+  assert.equal(normalizeCatalog(info,stale,parsed).entries.length,2);
+  assert.throws(()=>normalizeCatalog({...info,preStoryCount:3},stale,parsed),/数量/);
+  assert.throws(()=>normalizeCatalog(info,{showType:1,moduleList:[{mediaCount:2,mediaList:[media[0],media[0]]}]},parsed),/编号/);
 });
 test('导入任务下载去重图片；重复导入保留录音、进度及编辑；失败不留下半成品', async () => {
   const dir=fs.mkdtempSync(path.join(os.tmpdir(),'ks-link-')), db=openDatabase(dir);

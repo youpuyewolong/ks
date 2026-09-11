@@ -45,7 +45,9 @@ function normalizeCatalog(info, list, parsed) {
   let media;
   if (list.showType === 1 && Array.isArray(list.moduleList)) {
     media = list.moduleList.flatMap(group => {
-      if (!Array.isArray(group.mediaList) || group.mediaCount !== group.mediaList.length) throw new Error('官方分组目录不完整，未写入数据库');
+      // Group badges can be stale (album 262 reports 71 for a 70-entry group).
+      // The album-wide count and unique IDs below remain mandatory.
+      if (!Array.isArray(group.mediaList)) throw new Error('官方分组目录结构不完整，未写入数据库');
       return group.mediaList;
     });
   } else if (list.showType === 2 && Array.isArray(list.mediaList)) media = list.mediaList;
