@@ -45,20 +45,23 @@ $('#cover-file').onchange=guarded(async event=>{
 });
 $('#remove-cover').onclick=guarded(async()=>{if(coverUploading)return;if(selectedCover&&selectedCover!==currentStory()?.cover_id)await api('/api/admin/media/'+selectedCover,'DELETE');selectedCover=null;renderCover()});
 function durationOf(file){return new Promise(resolve=>{const a=new Audio(),url=URL.createObjectURL(file);let done=false;const finish=value=>{if(done)return;done=true;clearTimeout(timer);a.removeAttribute('src');a.load();URL.revokeObjectURL(url);resolve(value)};const timer=setTimeout(()=>finish(0),8000);a.preload='metadata';a.onloadedmetadata=()=>finish(Number.isFinite(a.duration)?a.duration:0);a.onerror=()=>finish(0);a.src=url;});}
+function uploadKind(){return $('#upload-kind').value}
+function queueStates(){return StoryMatching.analyzeQueue(queue,currentStory()?.episodes||[],uploadKind())}
 function queueRender(){
-  const states=StoryMatching.analyzeQueue(queue,currentStory()?.episodes||[]);
+  $('#upload-kind').disabled=uploading||coverUploading||batchBusy;
+  const states=queueStates();
   renderUploadBoard(states);
   const ready=states.filter(s=>s.ready).length,issues=states.filter(s=>s.issue).length,done=states.filter(s=>s.state==='done').length,discarded=states.filter(s=>s.state==='discarded').length;
-  $('#upload-summary').textContent=queue.length?`已上传 ${done} · 可上传 ${ready} · 问题未上传 ${issues} · 已舍弃 ${discarded}`:'';
+  $('#upload-summary').textContent=queue.length?`已上传 ${done} · 可上传 ${ready} · 问题未上传 ${issues} · 其他类型暂不上传 ${states.filter(s=>s.state==='outside').length} · 已舍弃 ${discarded}`:'';
   $('#retry-failed').hidden=uploading||!queue.some(q=>q.status==='error');
   $('#start-uploads').hidden=uploading||!ready;
-  $('#start-uploads').textContent='上传匹配正常的 '+ready+' 个文件';
+  $('#start-uploads').textContent='上传'+(uploadKind()||'全部类型')+'中匹配正常的 '+ready+' 个文件';
 }
 async function runQueue(){
   if(uploading||coverUploading||batchBusy)return;
   for(const q of queue)if(q.status==='waiting'&&!q.target)q.status='skipped';
   queueRender();
-  const states=StoryMatching.analyzeQueue(queue,currentStory().episodes);
+  const states=queueStates();
   const waiting=states.filter(s=>s.ready).map(s=>queue[s.index]);
   if(!waiting.length){toast('没有可上传的文件，未匹配文件已标记为未上传');return}
   const replace=waiting.filter(q=>currentStory().episodes.find(e=>e.id===q.target)?.has_audio);
@@ -81,18 +84,19 @@ async function runQueue(){
   }await refresh();renderEpisodes();}finally{uploading=false;$('#choose-audio').disabled=false;$('#close-editor').disabled=false;$('#save-story').disabled=false;queueRender()}
 }
 async function addFiles(files,directTarget=null){
-  if(!editing||uploading||coverUploading)return;
+  if(!editing||uploading||coverUploading||batchBusy)return;
+  if(directTarget&&uploadKind()){const kind=currentStory()?.episodes.find(e=>e.id===directTarget)?.kind||'故事';if(kind!==uploadKind()){$('#upload-kind').value=kind;$('#upload-kind').onchange()}}
   const existing=new Set(queue.filter(q=>q.status!=='done').map(q=>[q.file.name,q.file.size,q.file.lastModified].join(':')));
   for(const file of [...files].sort((a,b)=>a.name.localeCompare(b.name,'zh-CN',{numeric:true}))){
     const key=[file.name,file.size,file.lastModified].join(':');
     if(existing.has(key)){
       const pending=queue.find(q=>q.status!=='done'&&[q.file.name,q.file.size,q.file.lastModified].join(':')===key);
-      if(directTarget&&pending&&!pending.media){pending.target=directTarget;pending.reason='指定分集';pending.status='waiting';pending.message='';}
+      if(directTarget&&pending&&!pending.media){pending.target=directTarget;pending.manual=true;pending.reason='指定分集';pending.status='waiting';pending.message='';}
       continue;
     }
     existing.add(key);
-    const match=StoryMatching.matchEpisode(file.name,currentStory().episodes);
-    queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id?'new':''),reason:directTarget?'指定分集':match.reason,candidates:match.candidates||[],candidateScores:match.candidateScores||[],status:'waiting',message:'',percent:0});
+    const match=StoryMatching.matchForKind(file.name,currentStory().episodes,uploadKind());
+    queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id&&!uploadKind()?'new':''),manual:!!directTarget,reason:directTarget?'指定分集':match.reason,candidates:match.candidates||[],candidateScores:match.candidateScores||[],status:'waiting',message:'',percent:0});
   }
   queueRender();
   if(directTarget && queue.filter(q=>q.status==='waiting').length===1)await runQueue();

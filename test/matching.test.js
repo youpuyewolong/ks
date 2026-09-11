@@ -67,3 +67,15 @@ test('名称相似度70%边界，忽略编号但保留标题内数字，多个�
  assert.equal(matchEpisode('08 abcdefghij.mp3',two).id,'a');
  assert.equal(require('../matching').titleKey('13.2 第六集：寻找100个朋友.mp3'),'寻找100个朋友');
 });
+test('按上传类型隔离全选录音，切换类型后未上传文件可继续，已完成不重复上传',()=>{
+ const {matchForKind,analyzeQueue}=require('../matching');
+ const eps=[{id:'a',title:'神秘飞船',kind:'故事'},{id:'b',title:'神秘飞船番外',kind:'番外'},{id:'c',title:'引擎原理',kind:'科学揭秘'}];
+ const q=eps.map(e=>{const m=matchForKind(e.title+'.mp3',eps,'故事');return {file:{name:e.title+'.mp3'},target:m.id,candidates:m.candidates,status:'waiting'}});
+ let states=analyzeQueue(q,eps,'故事');assert.deepEqual(states.map(s=>s.state),['ready','outside','outside']);
+ q[0].status='done';states=analyzeQueue(q,eps,'番外');assert.deepEqual(states.map(s=>s.ready),[false,true,false]);
+ assert.equal(matchForKind('神秘飞船番外.mp3',eps,'故事').id,'b');
+ const same=[{id:'a',title:'同名',kind:'故事'},{id:'b',title:'同名',kind:'番外'}];
+ assert.equal(matchForKind('同名.mp3',same,'故事').id,'a');assert.equal(matchForKind('同名.mp3',same,'番外').id,'b');
+ assert.equal(matchForKind('完全未知.mp3',eps,'故事').id,null);
+ assert.equal(analyzeQueue([{target:'new',status:'waiting'}],eps,'故事')[0].ready,false);
+});
