@@ -140,6 +140,29 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
       if (episodeList && method === 'POST') { row('stories', episodeList[1]); const b = await body(req), id = crypto.randomUUID(); const next = db.prepare('SELECT COALESCE(MAX(sort_order),0)+1 n FROM episodes WHERE story_id=?').get(episodeList[1]).n; db.prepare('INSERT INTO episodes(id,story_id,title,media_id,sort_order,duration,cover_id,subtitle,kind) VALUES(?,?,?,?,?,?,?,?,?)').run(id, episodeList[1], label(b.title), b.media_id ? mediaRef(b.media_id, 'audio') : null, next, numeric(b.duration ?? 0), b.cover_id ? mediaRef(b.cover_id,'image') : null, String(b.subtitle||'').slice(0,500), ['故事','科学揭秘','番外'].includes(b.kind)?b.kind:'故事'); return json(res, 201, { id }); }
       const order = /^\/api\/admin\/stories\/([^/]+)\/order$/.exec(p);
       if (order && method === 'PUT') { row('stories', order[1]); const b = await body(req), ids = db.prepare('SELECT id FROM episodes WHERE story_id=?').all(order[1]).map(e => e.id); if (!Array.isArray(b.ids) || b.ids.length !== ids.length || new Set(b.ids).size !== ids.length || b.ids.some(id => !ids.includes(id))) fail(400, '分集列表已变化，请刷新后重试'); db.exec('BEGIN'); try { b.ids.forEach((id, i) => db.prepare('UPDATE episodes SET sort_order=? WHERE id=?').run(i + 1, id)); db.exec('COMMIT'); } catch (e) { db.exec('ROLLBACK'); throw e; } return json(res, 200, { ok: true }); }
+      const batchMatch = /^\/api\/admin\/stories\/([^/]+)\/episodes\/batch$/.exec(p);
+      if (batchMatch && method === 'POST') {
+        const story = row('stories',batchMatch[1]), b = await body(req);
+        if (!Array.isArray(b.episodes) || !b.episodes.length || b.episodes.length>2000 || new Set(b.episodes.map(e=>e?.id)).size!==b.episodes.length) fail(400,'请选择有效且不重复的分集');
+        if (!['delete','kind'].includes(b.action) || b.action==='kind'&&!['故事','科学揭秘','番外'].includes(b.kind)) fail(400,'操作或类型无效');
+        const entries=b.episodes.map(item=>{
+          const e=row('episodes',item?.id);
+          if(e.story_id!==story.id)fail(400,'所选分集不属于当前专辑');
+          if(item.media_id!==e.media_id)fail(409,'分集录音已变化，请刷新后重新确认');
+          return e;
+        });
+        db.exec('BEGIN IMMEDIATE');
+        try {
+          for(const e of entries) {
+            if(b.action==='delete')db.prepare('DELETE FROM episodes WHERE id=?').run(e.id);
+            else db.prepare('UPDATE episodes SET kind=? WHERE id=?').run(b.kind,e.id);
+          }
+          if(!db.prepare('SELECT 1 FROM episodes WHERE story_id=?').get(story.id))db.prepare('UPDATE stories SET published=0 WHERE id=?').run(story.id);
+          db.exec('COMMIT');
+        }catch(e){db.exec('ROLLBACK');throw e;}
+        if(b.action==='delete')for(const id of new Set(entries.flatMap(e=>[e.media_id,e.cover_id])))await removeUnused(id);
+        return json(res,200,{ok:true,count:entries.length});
+      }
       const episodeMatch = /^\/api\/admin\/episodes\/([^/]+)$/.exec(p);
       if (episodeMatch && ['PUT','DELETE'].includes(method)) { const e = row('episodes', episodeMatch[1]); if (method === 'DELETE') { db.prepare('DELETE FROM episodes WHERE id=?').run(e.id); if (!db.prepare('SELECT 1 FROM episodes WHERE story_id=?').get(e.story_id)) db.prepare('UPDATE stories SET published=0 WHERE id=?').run(e.story_id); await removeUnused(e.media_id); await removeUnused(e.cover_id); } else { const b = await body(req); if ('expected_media_id' in b && b.expected_media_id !== e.media_id) fail(409, '该分集录音已变化，请刷新后重试'); const mediaId = b.media_id ? mediaRef(b.media_id, 'audio') : e.media_id; const coverId=b.cover_id===undefined?e.cover_id:b.cover_id?mediaRef(b.cover_id,'image'):null; db.prepare('UPDATE episodes SET title=?,media_id=?,duration=?,cover_id=?,subtitle=?,kind=? WHERE id=?').run(label(b.title ?? e.title), mediaId, numeric(b.duration ?? e.duration), coverId, String(b.subtitle ?? e.subtitle).slice(0,500), ['故事','科学揭秘','番外'].includes(b.kind)?b.kind:e.kind, e.id); if (coverId!==e.cover_id) await removeUnused(e.cover_id); if (mediaId !== e.media_id) { db.prepare('DELETE FROM progress WHERE episode_id=?').run(e.id); await removeUnused(e.media_id); } } return json(res, 200, { ok: true }); }
       const unusedMedia = /^\/api\/admin\/media\/([^/]+)$/.exec(p);
