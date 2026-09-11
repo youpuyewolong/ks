@@ -103,10 +103,14 @@ function createApp({ dataDir = process.env.DATA_DIR || path.join(__dirname, 'dat
       if (p === '/api/catalog' && method === 'GET') return json(res, 200, catalog());
       if (p === '/api/admin/catalog' && method === 'GET') return json(res, 200, catalog(true));
       if (p === '/api/admin/kaishu-import' && method === 'GET') return json(res, 200, { job:imports.current() });
+      if (p === '/api/admin/kaishu-import/confirm' && method === 'POST') {
+        const b = await body(req);
+        return json(res, 202, { job:imports.confirm(b.job_id, b.entry_ids) });
+      }
       if (p === '/api/admin/kaishu-import' && method === 'POST') {
         const b = await body(req);
         if (b.category_id != null && typeof b.category_id !== 'string') fail(400, '分类格式不正确');
-        return json(res, 202, { job:imports.start(b.url, b.category_id || null) });
+        return json(res, 202, { job:imports.start(b.url, b.category_id || null, {previewOnly:b.preview === true}) });
       }
       if (p === '/api/listening' && method === 'GET') return json(res, 200, { progress: db.prepare('SELECT p.* FROM progress p JOIN episodes e ON e.id=p.episode_id JOIN stories s ON s.id=e.story_id WHERE s.published=1 ORDER BY p.updated_at DESC').all(), favorites: db.prepare('SELECT f.story_id FROM favorites f JOIN stories s ON s.id=f.story_id WHERE s.published=1').all().map(f => f.story_id) });
       if (p === '/api/progress' && method === 'PUT') {

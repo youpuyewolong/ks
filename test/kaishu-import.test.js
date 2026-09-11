@@ -76,12 +76,49 @@ test('后台导入接口要求登录，启动任务、查询结果及本地图�
   try {
     assert.equal((await fetch(base+'/api/admin/kaishu-import')).status,401);
     assert.equal((await fetch(base+'/api/admin/kaishu-import',{method:'POST',body:JSON.stringify({url:link})})).status,401);
+    assert.equal((await fetch(base+'/api/admin/kaishu-import/confirm',{method:'POST',body:JSON.stringify({job_id:'x',entry_ids:['cat1']})})).status,401);
     const login=await fetch(base+'/api/admin/login',{method:'POST',body:JSON.stringify({password:'secret'})}); const cookie=login.headers.get('set-cookie').split(';')[0];
-    const start=await fetch(base+'/api/admin/kaishu-import',{method:'POST',headers:{cookie},body:JSON.stringify({url:link})}); assert.equal(start.status,202);
+    const start=await fetch(base+'/api/admin/kaishu-import',{method:'POST',headers:{cookie},body:JSON.stringify({url:link,preview:true})}); assert.equal(start.status,202);
     let job;
     for (let i=0;i<100;i++) { job=(await(await fetch(base+'/api/admin/kaishu-import',{headers:{cookie}})).json()).job; if(job.status!=='running')break; await new Promise(r=>setTimeout(r,10)); }
+    assert.equal(job.status,'preview',job.message);
+    assert.equal((await(await fetch(base+'/api/catalog')).json()).stories.length,0);
+    const confirmation=await fetch(base+'/api/admin/kaishu-import/confirm',{method:'POST',headers:{cookie},body:JSON.stringify({job_id:job.id,entry_ids:['cat1','cat2']})});assert.equal(confirmation.status,202);
+    for (let i=0;i<100;i++) {job=(await(await fetch(base+'/api/admin/kaishu-import',{headers:{cookie}})).json()).job;if(job.status!=='running')break;await new Promise(r=>setTimeout(r,10));}
     assert.equal(job.status,'complete',job.message);
     const cat=await(await fetch(base+'/api/catalog')).json(); assert.equal(cat.stories[0].episodes.length,2); assert.equal(cat.stories[0].episodes[0].audio_url,null);
     assert.equal((await fetch(base+cat.stories[0].cover_url)).status,200);
   } finally { await new Promise(r=>server.close(r)); fs.rmSync(dir,{recursive:true,force:true}); }
+});
+test('预览不下载图片或写库；确认仅导入所选分集，后续补导不删除已有内容',async()=>{
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'ks-selection-')),db=openDatabase(dir),requests=[];
+  const grouped={showType:1,moduleList:[
+    {moduleName:'主线',mediaCount:1,mediaList:[{...media[0],cover:cover+'?one'}]},
+    {moduleName:'番外',mediaCount:1,mediaList:[{...media[1],mediaName:'特别篇',cover:cover+'?two'}]}
+  ]};
+  const fetchImpl=async url=>{requests.push(url);return url.startsWith('https://cdn.')?new Response(png):Response.json({code:0,data:url.includes('get_info')?info:grouped})};
+  const manager=createImportManager(db,dir,{fetchImpl});
+  try{
+    manager.start(link,null,{previewOnly:true});const preview=await finish(manager);
+    assert.equal(preview.status,'preview');assert.equal(preview.entries[0].group,'主线');assert.equal(preview.entries[1].kind,'番外');
+    assert.equal(requests.length,2);assert.equal(db.prepare('SELECT count(*) n FROM stories').get().n,0);
+    assert.throws(()=>manager.confirm(preview.id,[]),/至少/);
+    assert.throws(()=>manager.confirm(preview.id,['cat1','cat1']),/重复/);
+    assert.throws(()=>manager.confirm(preview.id,['cat999']),/不属于/);
+    assert.throws(()=>manager.confirm('old',['cat1']),/失效/);
+    manager.confirm(preview.id,['cat1']);assert.throws(()=>manager.confirm(preview.id,['cat1']),/已提交/);
+    assert.equal((await finish(manager)).status,'complete');
+    assert.equal(requests.some(u=>u.endsWith('?two')),false);
+    assert.equal(db.prepare('SELECT source_id FROM episodes').get().source_id,'cat1');
+    db.prepare("UPDATE episodes SET title='自定义标题'").run();
+    manager.start(link,null,{previewOnly:true});const second=await finish(manager);
+    assert.equal(second.entries[0].exists,true);assert.equal(second.entries[1].exists,false);
+    manager.confirm(second.id,['cat2']);assert.equal((await finish(manager)).status,'complete');
+    assert.equal(db.prepare('SELECT count(*) n FROM episodes').get().n,2);
+    assert.equal(db.prepare("SELECT sort_order FROM episodes WHERE source_id='cat2'").get().sort_order,2);
+    assert.equal(db.prepare("SELECT title FROM episodes WHERE source_id='cat1'").get().title,'自定义标题');
+    manager.start(link,null,{previewOnly:true});const third=await finish(manager);
+    manager.start(link,null,{previewOnly:true});await finish(manager);
+    assert.throws(()=>manager.confirm(third.id,['cat1']),/失效/);
+  }finally{manager.stop();db.close();fs.rmSync(dir,{recursive:true,force:true})}
 });

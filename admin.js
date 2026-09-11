@@ -143,11 +143,51 @@ document.addEventListener('click',guarded(async e=>{
 $('#login-form').onsubmit=guarded(async e=>{e.preventDefault();await api('/api/admin/login','POST',{password:$('#password').value});$('#password').value='';await init()});
 $('#logout').onclick=guarded(async()=>{await api('/api/admin/logout','POST');await init()});
 let importTimer = null, importedStory = null;
+let previewJob = null, previewEntries = [], selectedEntries = new Set();
+function updateSelection() {
+  $('#selection-count').textContent = `已选 ${selectedEntries.size} / ${previewEntries.length} 集`;
+  $('#confirm-import').disabled = !selectedEntries.size;
+  $('#confirm-import').textContent = `确认导入 ${selectedEntries.size} 集`;
+  document.querySelectorAll('#import-preview input[type=checkbox]').forEach(input=>{
+    const matches = previewEntries.filter(e=>input.dataset.entry ? e.id===input.dataset.entry : input.dataset.kind ? e.kind===input.dataset.kind : e.group===input.dataset.group);
+    const count = matches.filter(e=>selectedEntries.has(e.id)).length;
+    input.checked = !!matches.length && count===matches.length;
+    input.indeterminate = count>0 && count<matches.length;
+  });
+}
+function showSelection(job) {
+  $('#import-preview').hidden = job?.status !== 'preview';
+  if (job?.status !== 'preview') { previewJob=null; return; }
+  if (previewJob === job.id) return;
+  previewJob=job.id; previewEntries=job.entries; selectedEntries=new Set(previewEntries.map(e=>e.id));
+  const kinds=[...new Set(previewEntries.map(e=>e.kind))], groups=[...new Set(previewEntries.map(e=>e.group))];
+  $('#import-type-options').innerHTML='<strong>按类型选择</strong>'+kinds.map(kind=>`<label><input type="checkbox" data-kind="${esc(kind)}">${esc(kind)} · ${previewEntries.filter(e=>e.kind===kind).length} 集</label>`).join('');
+  $('#import-entry-options').innerHTML=groups.map(group=>{
+    const entries=previewEntries.filter(e=>e.group===group);
+    return `<details open class="import-group"><summary>${esc(group)} · ${entries.length} 集</summary><label class="group-selection"><input type="checkbox" data-group="${esc(group)}">选择此分组全部分集</label>${entries.map(e=>`<label class="import-entry"><input type="checkbox" data-entry="${esc(e.id)}"><span><strong>${esc(e.title)}</strong><small>${esc(e.subtitle || '')}</small></span><span class="muted">${esc(e.kind)}${e.labels?' · '+esc(e.labels):''}<small>${esc(e.duration)}${e.exists?' · 本地已有':''}</small></span></label>`).join('')}</details>`;
+  }).join('');
+  updateSelection();
+}
+$('#import-preview').onchange = event=>{
+  const input=event.target;if(!input.matches('input[type=checkbox]'))return;
+  previewEntries.filter(e=>input.dataset.entry ? e.id===input.dataset.entry : input.dataset.kind ? e.kind===input.dataset.kind : e.group===input.dataset.group).forEach(e=>input.checked?selectedEntries.add(e.id):selectedEntries.delete(e.id));
+  updateSelection();
+};
+$('#select-all-import').onclick=()=>{selectedEntries=new Set(previewEntries.map(e=>e.id));updateSelection()};
+$('#select-none-import').onclick=()=>{selectedEntries.clear();updateSelection()};
+$('#confirm-import').onclick=guarded(async()=>{
+  $('#confirm-import').disabled=true;
+  try {
+    const {job}=await api('/api/admin/kaishu-import/confirm','POST',{job_id:previewJob,entry_ids:[...selectedEntries]});
+    renderImport(job);importTimer=setTimeout(pollImport,1000);
+  } catch(e) {$('#confirm-import').disabled=!selectedEntries.size;throw e;}
+});
 function renderImport(job) {
+  showSelection(job);
   const running = job?.status === 'running';
   $('#start-import').disabled = running;
   $('#kaishu-url').disabled = running;
-  $('#import-category').disabled = running;
+  $('#import-category').disabled = running || job?.status === 'preview';
   $('#import-status').hidden = !job;
   $('#refresh-import').hidden = true;
   if (!job) return;
@@ -160,7 +200,7 @@ function renderImport(job) {
   $('#import-status').classList.toggle('import-failed', job.status === 'failed');
   importedStory = job.result?.story_id || null;
   $('#open-imported').hidden = !importedStory;
-  $('#start-import').textContent = running ? '正在导入…' : job.status === 'failed' ? '重新获取并导入' : '获取并导入';
+  $('#start-import').textContent = running ? '正在处理…' : '获取目录预览';
 }
 async function pollImport() {
   clearTimeout(importTimer);
@@ -177,7 +217,7 @@ async function pollImport() {
 $('#link-import-form').onsubmit = guarded(async event => {
   event.preventDefault(); $('#start-import').disabled = true;
   try {
-    const {job} = await api('/api/admin/kaishu-import', 'POST', { url:$('#kaishu-url').value.trim(), category_id:$('#import-category').value || null });
+    const {job} = await api('/api/admin/kaishu-import', 'POST', { url:$('#kaishu-url').value.trim(), category_id:$('#import-category').value || null, preview:true });
     $('#kaishu-url').value = ''; renderImport(job); importTimer = setTimeout(pollImport, 1000);
   } catch (e) { $('#start-import').disabled = false; throw e; }
 });

@@ -48,7 +48,7 @@ function normalizeCatalog(info, list, parsed) {
       // Group badges can be stale (album 262 reports 71 for a 70-entry group).
       // The album-wide count and unique IDs below remain mandatory.
       if (!Array.isArray(group.mediaList)) throw new Error('官方分组目录结构不完整，未写入数据库');
-      return group.mediaList;
+      return group.mediaList.map(m => ({...m, groupName:String(group.moduleName || '未命名分组')}));
     });
   } else if (list.showType === 2 && Array.isArray(list.mediaList)) media = list.mediaList;
   else throw new Error('暂不支持此专辑的目录结构');
@@ -60,19 +60,21 @@ function normalizeCatalog(info, list, parsed) {
     if (!/^[1-9]\d*$/.test(id) || seen.has(id) || typeof m.mediaName !== 'string' || !m.mediaName.trim() || !Number.isFinite(seconds) || seconds < 0 || seconds > 1e7) throw new Error('官方分集编号、名称或时长不完整');
     seen.add(id);
     const filters = (list.albumFilterList || []).filter(f => (m.filterIdList || []).includes(f.filterId)).map(f => f.filterName).join(' ');
-    return { id:'cat'+id, order:i+1, title:m.mediaName.trim(), subtitle:String(m.subhand || ''), duration:`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`, cover:imageUrl(m.cover), kind:/科学|揭秘/.test(filters+' '+m.subhand) ? '科学揭秘' : /^第\s*\d+集/.test(m.mediaName) ? '故事' : '番外' };
+    return { group:m.groupName || '全部分集', labels:filters, id:'cat'+id, order:i+1, title:m.mediaName.trim(), subtitle:String(m.subhand || ''), duration:`${Math.floor(seconds/60)}:${String(Math.floor(seconds%60)).padStart(2,'0')}`, cover:imageUrl(m.cover), kind:/科学|揭秘/.test(filters+' '+m.subhand) ? '科学揭秘' : /^第\s*\d+集/.test(m.mediaName) ? '故事' : '番外' };
   });
   const seasonMatch = /^(.*?)\s*第\s*(\d+)\s*季/.exec(info.albumName);
   return { album_id:parsed.albumId, source_url:parsed.sourceUrl, title:info.albumName.trim(), description:String(info.subhead || info.albumDescribe || '').slice(0,3000), series:seasonMatch ? seasonMatch[1].trim() : info.albumName.trim(), season:seasonMatch ? Number(seasonMatch[2]) : null, captured_at:new Date().toISOString(), complete:true, expected_count:count, cover:imageUrl(info.iconUrl || info.coverUrl), entries };
 }
-async function downloadCatalog(parsed, directory, options = {}, progress = () => {}) {
-  progress({ stage:'metadata', message:'正在获取专辑资料和完整分集目录' });
+async function fetchCatalog(parsed, options = {}) {
   const results = await Promise.allSettled([
     apiData('/rs_content/ajax/album/get_info', parsed.albumId, options),
     apiData('/v2/content/album/media-list', parsed.albumId, options)
   ]);
   for (const r of results) if (r.status === 'rejected') throw r.reason;
-  const catalog = normalizeCatalog(results[0].value, results[1].value, parsed);
+  return normalizeCatalog(results[0].value, results[1].value, parsed);
+}
+async function downloadCatalog(parsed, directory, options = {}, progress = () => {}) {
+  const catalog = options.catalog ? structuredClone(options.catalog) : await fetchCatalog(parsed, options);
   const urls = [...new Set([catalog.cover, ...catalog.entries.map(e => e.cover)])];
   const files = new Map(); let cursor = 0, done = 0, totalBytes = 0;
   progress({ stage:'images', title:catalog.title, episodes:catalog.entries.length, done, total:urls.length, message:'正在下载专辑和分集封面' });
@@ -98,36 +100,64 @@ async function downloadCatalog(parsed, directory, options = {}, progress = () =>
   const file = path.join(directory, 'catalog.json'); await fs.writeFile(file, JSON.stringify(catalog)); return file;
 }
 function createImportManager(db, dataDir, { fetchImpl = fetch } = {}) {
-  let job = null, controller;
+  let job = null, controller, pending = null;
+  const current = () => job ? structuredClone(job) : null;
+  function execute(parsed, categoryId, selectedCatalog, previewOnly) {
+    controller = new AbortController();
+    const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(15*60*1000)]);
+    const active = job;
+    (async () => {
+      let directory;
+      try {
+        const source = selectedCatalog || await fetchCatalog(parsed, { fetchImpl, signal });
+        signal.throwIfAborted();
+        if (previewOnly) {
+          pending = { source, parsed, categoryId };
+          const existing = new Set(db.prepare('SELECT e.source_id FROM episodes e JOIN stories s ON s.id=e.story_id WHERE s.source_album_id=?').all(source.album_id).map(e=>e.source_id));
+          Object.assign(active, { status:'preview', stage:'preview', title:source.title, message:'目录已获取，请勾选需要导入的内容', episodes:source.entries.length,
+            entries:source.entries.map(({id,title,subtitle,duration,kind,group,labels})=>({id,title,subtitle,duration,kind,group,labels,exists:existing.has(id)})) });
+          return;
+        }
+        directory = await fs.mkdtemp(path.join(dataDir, 'kaishu-import-'));
+        const file = await downloadCatalog(parsed, directory, { fetchImpl, signal, catalog:source }, values => Object.assign(active, values));
+        signal.throwIfAborted();
+        Object.assign(active, { stage:'database', message:'正在校验图片并写入本地数据库' });
+        const result = importCatalog(db, dataDir, file, { categoryId });
+        Object.assign(active, { status:'complete', stage:'complete', message:'所选内容导入完成，可以上传对应录音', result });
+      } catch (e) {
+        Object.assign(active, { status:'failed', stage:'failed', message:signal.aborted ? '任务已停止或超过 15 分钟，请重新获取目录' : e.message });
+      } finally {
+        if (active.status !== 'preview') active.finished_at = new Date().toISOString();
+        if (directory) await fs.rm(directory, { recursive:true, force:true }).catch(() => {});
+      }
+    })();
+  }
   return {
-    current:() => job ? structuredClone(job) : null,
+    current,
     stop:() => controller?.abort(),
-    start(value, categoryId) {
+    start(value, categoryId, {previewOnly=false} = {}) {
       const parsed = parseAlbumLink(value);
       if (job?.status === 'running') throw Object.assign(new Error('已有专辑正在导入，请等待完成'), { status:409 });
       if (categoryId && !db.prepare('SELECT id FROM categories WHERE id=?').get(categoryId)) throw inputError('所选分类不存在');
-      controller = new AbortController();
-      const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(15*60*1000)]);
-      job = { id:crypto.randomUUID(), album_id:parsed.albumId, status:'running', stage:'metadata', message:'准备导入', done:0, total:0, started_at:new Date().toISOString() };
-      const current = job;
-      // Never store the pasted URL or its tracking/login parameters.
-      (async () => {
-        let directory;
-        try {
-          directory = await fs.mkdtemp(path.join(dataDir, 'kaishu-import-'));
-          const file = await downloadCatalog(parsed, directory, { fetchImpl, signal }, values => Object.assign(current, values));
-          signal.throwIfAborted();
-          Object.assign(current, { stage:'database', message:'正在校验图片并写入本地数据库' });
-          const result = importCatalog(db, dataDir, file, { categoryId });
-          Object.assign(current, { status:'complete', stage:'complete', message:'导入完成，可以上传对应录音', result });
-        } catch (e) {
-          Object.assign(current, { status:'failed', stage:'failed', message:signal.aborted ? '任务已停止或超过 15 分钟，请重新导入' : e.message });
-        } finally {
-          current.finished_at = new Date().toISOString();
-          if (directory) await fs.rm(directory, { recursive:true, force:true }).catch(() => {});
-        }
-      })();
-      return structuredClone(current);
+      pending = null;
+      job = { id:crypto.randomUUID(), album_id:parsed.albumId, status:'running', stage:'metadata', message:'正在获取完整目录', done:0, total:0, started_at:new Date().toISOString() };
+      execute(parsed, categoryId, null, previewOnly);
+      return current();
+    },
+    confirm(id, ids) {
+      if (job?.id !== id || job.status !== 'preview' || !pending) throw Object.assign(new Error('预览已失效或已提交，请重新获取目录'), { status:409 });
+      if (!Array.isArray(ids) || !ids.length || ids.length > 2000 || ids.some(id=>typeof id !== 'string') || new Set(ids).size !== ids.length) throw inputError('请至少选择一个分集，且不要重复选择');
+      const selected = new Set(ids);
+      const entries = pending.source.entries.filter(e=>selected.has(e.id));
+      if (entries.length !== ids.length) throw inputError('所选分集不属于当前预览目录');
+      const {source,parsed,categoryId} = pending;
+      // Only the already verified complete snapshot may be reduced by selection.
+      const selection = {...source, source_count:source.entries.length, expected_count:entries.length, entries};
+      pending = null;
+      delete job.entries;
+      Object.assign(job, { status:'running', stage:'images', message:'正在下载所选内容的封面', episodes:entries.length });
+      execute(parsed, categoryId, selection, false);
+      return current();
     }
   };
 }

@@ -30,7 +30,7 @@ function importCatalog(db, dataDir, catalogFile, { once = false, categoryId: cho
     return id;
   }
   const coverId = image(source.cover_file);
-  const entries = source.entries.map((e,i) => ({ ...e, order:i+1, coverId:image(e.cover_file), durationSeconds:e.duration.split(':').map(Number).reduce((a,n)=>a*60+n,0), kind:e.kind || (/^第\s*\d+集/.test(e.title)?'故事':/∣|揭秘|什么是/.test(e.title+' '+e.subtitle)?'科学揭秘':'番外') }));
+  const entries = source.entries.map((e,i) => ({ ...e, order:Number.isInteger(e.order) && e.order > 0 ? e.order : i+1, coverId:image(e.cover_file), durationSeconds:e.duration.split(':').map(Number).reduce((a,n)=>a*60+n,0), kind:e.kind || (/^第\s*\d+集/.test(e.title)?'故事':/∣|揭秘|什么是/.test(e.title+' '+e.subtitle)?'科学揭秘':'番外') }));
   const newFiles = [];
   db.exec('BEGIN IMMEDIATE');
   try {
