@@ -92,7 +92,7 @@ async function addFiles(files,directTarget=null){
     }
     existing.add(key);
     const match=StoryMatching.matchEpisode(file.name,currentStory().episodes);
-    queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id?'new':''),reason:directTarget?'指定分集':match.reason,candidates:match.candidates||[],status:'waiting',message:'',percent:0});
+    queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id?'new':''),reason:directTarget?'指定分集':match.reason,candidates:match.candidates||[],candidateScores:match.candidateScores||[],status:'waiting',message:'',percent:0});
   }
   queueRender();
   if(directTarget && queue.filter(q=>q.status==='waiting').length===1)await runQueue();

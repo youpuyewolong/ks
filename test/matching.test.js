@@ -23,21 +23,21 @@ test('第六季用户提供的 130 个文件全部匹配到不同分集',()=>{
   ];
   for(const [file,title] of cases)assert.equal(matchEpisode(file+'.mp3',entries).id,entries.find(e=>e.title===title).id,file);
 });
-test('小数排序不回退到主线集数，重名与标题冲突不自动绑定',()=>{
+test('忽略混乱集数，以名称匹配，重名不自动绑定',()=>{
   assert.equal(matchEpisode('04.1 完全未知的科学揭秘.mp3',entries).id,null);
   assert.equal(matchEpisode('13.2未知番外.mp3',entries).id,null);
   assert.equal(matchEpisode('13.2.mp3',entries).id,null);
   const sample=[{id:'a',title:'第1集：谜案'},{id:'b',title:'第2集：追踪'}];
   assert.equal(matchEpisode('03 第1集：谜案.mp3',sample).id,'a');
-  assert.equal(matchEpisode('第1集：追踪.mp3',sample).id,null);
-  assert.equal(matchEpisode('01 追踪.mp3',sample).id,null);
+  assert.equal(matchEpisode('第1集：追踪.mp3',sample).id,'b');
+  assert.equal(matchEpisode('01 追踪.mp3',sample).id,'b');
   assert.equal(matchEpisode('00 主题曲.mp3',[{id:'a',title:'歌1',subtitle:'主题曲'},{id:'b',title:'歌2',subtitle:'主题曲'}]).id,null);
   assert.equal(matchEpisode('01.1 同名.mp3',[{id:'a',title:'同名'},{id:'b',title:'同名'}]).id,null);
 });
 const {analyzeQueue,orderFiles}=require('../matching');
-test('多候选保留具体分集，标题冲突列出双方',()=>{
+test('名称优先且重名保留具体候选',()=>{
   const episodes=[{id:'a',title:'第1集：谜案'},{id:'b',title:'第2集：追踪'}];
-  assert.deepEqual(matchEpisode('第1集：追踪.mp3',episodes).candidates,['a','b']);
+  assert.equal(matchEpisode('第1集：追踪.mp3',episodes).id,'b');
   assert.deepEqual(matchEpisode('01.1 同名.mp3',[{id:'x',title:'同名'},{id:'y',title:'同名'}]).candidates,['x','y']);
 });
 test('重复占用列出全部同伴，舍弃或改绑解除冲突，仅有效目标可重试',()=>{
@@ -56,4 +56,14 @@ test('文件优先跟随目录与候选位置，剩余文件自然排序',()=>{
   assert.deepEqual(orderFiles(q,episodes),[1,0,3,2]);
   assert.deepEqual(orderFiles(q,episodes,'added'),[0,1,2,3]);
   assert.deepEqual(orderFiles(q,episodes,'name').filter(i=>i>=2),[3,2]);
+});
+test('名称相似度70%边界，忽略编号但保留标题内数字，多个模糊候选不自动绑定',()=>{
+ const sample=[{id:'a',title:'第99集：abcdefghij'}];
+ assert.equal(matchEpisode('03 第1集：abcdefgxyz.mp3',sample).id,'a');
+ assert.equal(matchEpisode('03 第1集：abcdefwxyz.mp3',sample).id,null);
+ assert.equal(matchEpisode('第99集.mp3',sample).id,null);
+ const two=[...sample,{id:'b',title:'第2集：abcdefgxxx'}];
+ assert.deepEqual(matchEpisode('abcdefgxyz.mp3',two).candidates,['b','a']);
+ assert.equal(matchEpisode('08 abcdefghij.mp3',two).id,'a');
+ assert.equal(require('../matching').titleKey('13.2 第六集：寻找100个朋友.mp3'),'寻找100个朋友');
 });

@@ -12,10 +12,10 @@ const {matchEpisode}=require('../matching');
 
 test('文件名匹配不使用目录序号，重名或缺集要求人工选择',()=>{
  const episodes=[{id:'a',title:'第1集：谜案'},{id:'b',title:'科学揭秘：飞机'},{id:'c',title:'第2集：追踪'}];
- assert.equal(matchEpisode('02-测试.wav',episodes).id,'c');
+ assert.equal(matchEpisode('02-测试.wav',episodes).id,null);
  assert.equal(matchEpisode('科学揭秘：飞机.mp3',episodes).id,'b');
  assert.equal(matchEpisode('03-无对应.wav',episodes).id,null);
- assert.equal(matchEpisode('03-追踪.wav',[...episodes,{id:'d',title:'第3集：另一案'}]).id,null);
+ assert.equal(matchEpisode('03-追踪.wav',[...episodes,{id:'d',title:'第3集：另一案'}]).id,'c');
  assert.equal(matchEpisode('01.wav',[...episodes,{id:'d',title:'第1集：另一个版本'}]).id,null);
 });
 test('旧数据库迁移保留分集、录音、收藏和收听进度',()=>{

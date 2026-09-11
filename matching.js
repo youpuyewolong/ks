@@ -5,38 +5,32 @@
     const match = /第\s*0*(\d+)\s*集/.exec(text);
     return match ? Number(match[1]) : null;
   };
-  function fileParts(filename) {
-    const name=stem(filename);
-    // Decimal prefixes are file ordering, never the main story's episode number.
-    const prefix=/^\d+(?:\.\d+)*(?:[\s._-]+|(?=[^\d\s._-]))/.exec(name);
-    const decimal=/^\d+\.\d/.test(name);
-    const text=prefix ? name.slice(prefix[0].length) : name;
-    const explicit=explicitNumber(text);
-    const number=explicit ?? (!decimal && prefix ? Number(/^\d+/.exec(prefix[0])[0]) : /^\d+$/.test(name) ? Number(name) : null);
-    return {text,number};
-  }
   const episodeNumber = text => explicitNumber(stem(text));
-  const withoutNumber = text => normalize(stem(text).replace(/^第\s*\d+\s*集\s*[:：._-]?\s*/, ''));
-  function matchEpisode(filename, episodes) {
-    const exact=episodes.filter(e=>normalize(e.title)===normalize(filename) || e.source_id && normalize(e.source_id)===normalize(filename));
-    if(exact.length===1)return {id:exact[0].id,reason:'名称匹配'};
-    if(exact.length>1)return {id:null,reason:'存在多个候选，请手动选择',candidates:exact.map(e=>e.id)};
-    const {text,number}=fileParts(filename);
-    const numbered=number===null?[]:episodes.filter(e=>episodeNumber(e.title)===number);
-    const descriptive=episodes.filter(e=>withoutNumber(e.title)===withoutNumber(text));
-    if(descriptive.length>1)return {id:null,reason:'存在多个候选，请手动选择',candidates:descriptive.map(e=>e.id)};
-    if(descriptive.length===1){
-      if(numbered.length===1 && numbered[0].id!==descriptive[0].id && episodeNumber(descriptive[0].title)!==null)return {id:null,reason:'集数与标题冲突，请手动选择',candidates:[...new Set([...numbered,...descriptive].map(e=>e.id))]};
-      return {id:descriptive[0].id,reason:'标题匹配'};
-    }
-    // Generic song names only match when the catalog explicitly identifies one song.
-    if(normalize(text)==='主题曲'){
+  // Strip only leading file/episode numbering; numbers inside a title remain meaningful.
+  const titleKey = text => normalize(stem(text)
+    .replace(/^\d+(?:\.\d+)*(?:[\s._、:：-]+|(?=[^\d\s._-])|$)/,'')
+    .replace(/^第\s*[\d零〇一二三四五六七八九十百千两]+\s*[集章回]\s*[:：._、-]?\s*/,''));
+  function similarity(a,b){
+    if(!a||!b)return 0;
+    const left=Array.from(a),right=Array.from(b);let row=right.map((_,i)=>i+1);row.unshift(0);
+    for(let i=1;i<=left.length;i++){const next=[i];for(let j=1;j<=right.length;j++)next[j]=Math.min(next[j-1]+1,row[j]+1,row[j-1]+(left[i-1]===right[j-1]?0:1));row=next}
+    return 1-row[right.length]/Math.max(left.length,right.length);
+  }
+  function matchEpisode(filename,episodes){
+    const key=titleKey(filename);
+    if(!key)return {id:null,reason:'文件名缺少故事名称，请手动选择',candidates:[]};
+    const exact=episodes.filter(e=>titleKey(e.title)===key);
+    if(exact.length===1)return {id:exact[0].id,score:1,reason:'名称匹配 100%'};
+    if(exact.length>1)return {id:null,reason:'名称相同的分集有多个，请手动选择',candidates:exact.map(e=>e.id)};
+    if(key==='主题曲'){
       const songs=episodes.filter(e=>/主题曲/.test(e.title+' '+(e.subtitle||'')));
-      if(songs.length===1)return {id:songs[0].id,reason:'主题曲匹配，请核对'};
-      return {id:null,reason:songs.length>1?'存在多个候选，请手动选择':'未找到对应分集',candidates:songs.map(e=>e.id)};
+      if(songs.length===1)return {id:songs[0].id,reason:'主题曲标签匹配，请核对'};
+      if(songs.length>1)return {id:null,reason:'存在多个主题曲，请手动选择',candidates:songs.map(e=>e.id)};
     }
-    if(numbered.length===1)return {id:numbered[0].id,reason:'集数匹配，请核对'};
-    return {id:null,reason:numbered.length>1?'存在多个候选，请手动选择':'未找到对应分集',candidates:numbered.map(e=>e.id)};
+    const candidates=episodes.map(e=>({id:e.id,score:similarity(key,titleKey(e.title))})).filter(e=>e.score>=0.7).sort((a,b)=>b.score-a.score);
+    if(candidates.length===1)return {id:candidates[0].id,score:candidates[0].score,reason:'名称相似度 '+Math.round(candidates[0].score*100)+'%'};
+    if(candidates.length>1)return {id:null,reason:'多个名称相似度达到 70%，请手动选择',candidates:candidates.map(e=>e.id),candidateScores:candidates};
+    return {id:null,reason:'名称相似度未达到 70%，请手动选择',candidates:[]};
   }
   function analyzeQueue(queue,episodes){
     const ids=new Set(episodes.map(e=>e.id)),owners=new Map();
@@ -59,7 +53,7 @@
     };
     return queue.map((q,i)=>i).sort((a,b)=>mode==='added'?a-b:(mode==='catalog'?(rank(queue[a])-rank(queue[b])||0):0)||queue[a].file.name.localeCompare(queue[b].file.name,'zh-CN',{numeric:true})||a-b);
   }
-  root.StoryMatching={normalize,episodeNumber,matchEpisode,analyzeQueue,orderFiles};
+  root.StoryMatching={normalize,episodeNumber,titleKey,similarity,matchEpisode,analyzeQueue,orderFiles};
   if(typeof module!=='undefined')module.exports=root.StoryMatching;
 })(typeof window!=='undefined'?window:globalThis);
 
