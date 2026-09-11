@@ -29,7 +29,7 @@ function renderUploadBoard(states){
   $('#board-episodes').innerHTML=left.map(e=>{
     const assigned=states.filter(s=>queue[s.index].target===e.id&&s.state!=='discarded'&&s.state!=='outside');
     const conflict=assigned.some(s=>s.state==='conflict'),isCandidate=candidateIds.has(e.id);
-    return '<article class="board-episode '+(conflict?'conflict':assigned.length?'matched':'')+(isCandidate?' candidate':'')+'" data-drop-episode="'+esc(e.id)+'"><div class="board-card-title"><span class="board-order">'+(episodes.indexOf(e)+1)+'</span><strong>'+esc(e.title)+'</strong></div><p>'+esc(e.subtitle||'')+'</p><span class="board-badge">'+(conflict?'重复占用':assigned.length?'已关联文件':e.has_audio?'本地已有录音':'待关联')+(isCandidate?' · 当前候选':'')+'</span>'+assigned.map(s=>'<button type="button" data-board-select="'+s.index+'" class="board-linked">'+esc(queue[s.index].file.name)+(s.state==='done'?' · 已上传':'')+'</button>').join('')+'<button type="button" class="secondary" data-bind-episode="'+esc(e.id)+'" '+(!chosen||boardLocked()?'disabled':'')+'>'+(e.has_audio?'绑定到此集（已有录音）':'绑定到此集')+'</button></article>';
+    return '<article class="board-episode '+(conflict?'conflict':assigned.length?'matched':'')+(isCandidate?' candidate':'')+'" data-drop-episode="'+esc(e.id)+'"><div class="board-card-title"><span class="board-order">'+(episodes.indexOf(e)+1)+'</span><strong>'+esc(e.title)+'</strong></div><p>'+esc(e.subtitle||'')+'</p><span class="board-badge">'+(conflict?'重复占用':assigned.length?'已关联文件':e.has_audio?'本地已有录音':'待关联')+(isCandidate?' · 当前候选':'')+'</span>'+assigned.map(s=>'<button type="button" data-board-select="'+s.index+'" class="board-linked">'+esc(queue[s.index].file.name)+(s.state==='done'?' · 已上传':'')+'</button>').join('')+'<small class="direct-drop-hint">也可从电脑文件夹拖入一个录音，直接上传</small><button type="button" class="secondary" data-bind-episode="'+esc(e.id)+'" '+(!chosen||boardLocked()?'disabled':'')+'>'+(e.has_audio?'绑定到此集（已有录音）':'绑定到此集')+'</button></article>';
   }).join('')||'<p class="empty">没有符合条件的分集；可清空搜索或取消“只看候选”“隐藏已匹配”。</p>';
   const filter=$('#board-file-filter').value,search=$('#board-file-search').value.toLowerCase().trim();
   const visible=StoryMatching.orderFiles(queue,episodes,$('#board-file-sort').value).filter(i=>{
@@ -87,10 +87,13 @@ $('#upload-queue').ondragstart=event=>{
   boardSelected=i;$('#board-selected').textContent='正在拖动：'+q.file.name+' → 放到左侧对应分集';
 };
 $('#board-episodes').ondragover=event=>{if(event.target.closest('[data-drop-episode]')&&[...event.dataTransfer.types].includes('application/x-story-file')&&!boardLocked()){event.preventDefault();event.dataTransfer.dropEffect='move'}};
-$('#board-episodes').ondrop=event=>{
+$('#board-episodes').addEventListener('dragover',event=>{const node=event.target.closest('[data-drop-episode]');if(node&&[...event.dataTransfer.types].includes('Files')){event.preventDefault();event.dataTransfer.dropEffect=boardLocked()?'none':'copy';if(!boardLocked())node.classList.add('recording-drop-hover')}});
+$('#board-episodes').addEventListener('dragleave',event=>{const node=event.target.closest('[data-drop-episode]');if(node&&!node.contains(event.relatedTarget))node.classList.remove('recording-drop-hover')});
+$('#board-episodes').ondrop=guarded(async event=>{
   const node=event.target.closest('[data-drop-episode]'),value=event.dataTransfer.getData('application/x-story-file');
+  if(node&&[...event.dataTransfer.types].includes('Files')){await externalRecordingDrop(event,node.dataset.dropEpisode);return}
   if(!node||!/^\d+$/.test(value))return;event.preventDefault();bindBoardFile(Number(value),node.dataset.dropEpisode);
-};
+});
 $('#export-upload-issues').onclick=()=>{
   const states=queueStates();
   const lines=states.filter(s=>s.state!=='done').map(s=>{const q=queue[s.index];return q.file.name+'\t'+({outside:'其他类型暂不上传',ready:'可上传',conflict:'重复占用',ambiguous:'多个名称候选',unmatched:'未匹配',missing:'目标已删除',error:'上传失败',discarded:'已舍弃',uploading:'上传中'}[s.state]||s.state)+'\t'+(q.message||q.reason||'')});

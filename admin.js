@@ -57,12 +57,12 @@ function queueRender(){
   $('#start-uploads').hidden=uploading||!ready;
   $('#start-uploads').textContent='上传'+(uploadKind()||'全部类型')+'中匹配正常的 '+ready+' 个文件';
 }
-async function runQueue(){
+async function runQueue(onlyItem=null){
   if(uploading||coverUploading||batchBusy)return;
   for(const q of queue)if(q.status==='waiting'&&!q.target)q.status='skipped';
   queueRender();
-  const states=queueStates();
-  const waiting=states.filter(s=>s.ready).map(s=>queue[s.index]);
+  const states=onlyItem?StoryMatching.analyzeQueue([onlyItem],currentStory().episodes):queueStates();
+  const waiting=onlyItem?(states[0].ready?[onlyItem]:[]):states.filter(s=>s.ready).map(s=>queue[s.index]);
   if(!waiting.length){toast('没有可上传的文件，未匹配文件已标记为未上传');return}
   const replace=waiting.filter(q=>currentStory().episodes.find(e=>e.id===q.target)?.has_audio);
   if(replace.length && !await confirmDelete(`将替换 ${replace.length} 集已有录音，并重置这些分集的收听进度。确认继续？`))return;
@@ -80,29 +80,40 @@ async function runQueue(){
         await api('/api/admin/episodes/'+episode.id,'PUT',{media_id:item.media.id,duration:item.duration,expected_media_id:episode.media_id});
       }
       item.status='done';item.percent=100;
+      if(onlyItem)for(const q of queue)if(q!==item&&q.target===item.target&&q.status!=='done'){q.status='discarded';q.message='已使用指定文件上传，原关联暂不上传'}
     }catch(e){item.status='error';item.message=e.message}queueRender();
   }await refresh();renderEpisodes();}finally{uploading=false;$('#choose-audio').disabled=false;$('#close-editor').disabled=false;$('#save-story').disabled=false;queueRender()}
 }
+async function uploadDirect(files,id){
+  if(!editing||uploading||coverUploading||batchBusy){toast('请等待当前上传或操作完成');return}
+  const list=[...files];if(list.length!==1){toast('请一次拖入一个录音文件到对应分集');return}
+  const file=list[0],episode=currentStory()?.episodes.find(e=>e.id===id);if(!episode)return;
+  if(!/\.(mp3|m4a|wav|ogg|flac|aac)$/i.test(file.name)||!file.size){toast('请拖入有效的录音文件，不支持直接拖入文件夹');return}
+  if(file.size>500*1024*1024){toast('文件不能超过 500 MB');return}
+  if(uploadKind()&&uploadKind()!==(episode.kind||'故事')){$('#upload-kind').value=episode.kind||'故事';$('#upload-kind').onchange()}
+  let item=queue.find(q=>q.status!=='done'&&!q.media&&q.file.name===file.name&&q.file.size===file.size&&q.file.lastModified===file.lastModified);
+  if(!item){item={file,percent:0};queue.push(item)}
+  Object.assign(item,{target:id,manual:true,status:'waiting',reason:'直接指定分集',message:'',candidates:[],candidateScores:[]});
+  queueRender();await runQueue(item);
+  if(item.status==='done')toast('已上传到：'+episode.title);
+}
 async function addFiles(files,directTarget=null){
   if(!editing||uploading||coverUploading||batchBusy)return;
-  if(directTarget&&uploadKind()){const kind=currentStory()?.episodes.find(e=>e.id===directTarget)?.kind||'故事';if(kind!==uploadKind()){$('#upload-kind').value=kind;$('#upload-kind').onchange()}}
+  if(directTarget){await uploadDirect(files,directTarget);return}
   const existing=new Set(queue.filter(q=>q.status!=='done').map(q=>[q.file.name,q.file.size,q.file.lastModified].join(':')));
   for(const file of [...files].sort((a,b)=>a.name.localeCompare(b.name,'zh-CN',{numeric:true}))){
     const key=[file.name,file.size,file.lastModified].join(':');
     if(existing.has(key)){
-      const pending=queue.find(q=>q.status!=='done'&&[q.file.name,q.file.size,q.file.lastModified].join(':')===key);
-      if(directTarget&&pending&&!pending.media){pending.target=directTarget;pending.manual=true;pending.reason='指定分集';pending.status='waiting';pending.message='';}
       continue;
     }
     existing.add(key);
     const match=StoryMatching.matchForKind(file.name,currentStory().episodes,uploadKind());
-    queue.push({file,target:directTarget||match.id||(!currentStory().source_album_id&&!uploadKind()?'new':''),manual:!!directTarget,reason:directTarget?'指定分集':match.reason,candidates:match.candidates||[],candidateScores:match.candidateScores||[],status:'waiting',message:'',percent:0});
+    queue.push({file,target:match.id||(!currentStory().source_album_id&&!uploadKind()?'new':''),manual:false,reason:match.reason,candidates:match.candidates||[],candidateScores:match.candidateScores||[],status:'waiting',message:'',percent:0});
   }
   queueRender();
-  if(directTarget && queue.filter(q=>q.status==='waiting').length===1)await runQueue();
-  else {toast('请核对文件与分集的对应关系，再点击确认上传');$('#upload-queue').scrollIntoView({behavior:'smooth',block:'nearest'})}
+  {toast('请核对文件与分集的对应关系，再点击确认上传');$('#upload-queue').scrollIntoView({behavior:'smooth',block:'nearest'})}
 }
-$('#start-uploads').onclick=guarded(runQueue);
+$('#start-uploads').onclick=guarded(()=>runQueue());
 $('#choose-audio').onclick=()=>$('#audio-files').click();$('#audio-files').onchange=guarded(async e=>{const files=[...e.target.files];e.target.value='';await addFiles(files)});
 $('#retry-failed').onclick=guarded(async()=>{queue.filter(q=>q.status==='error').forEach(q=>{q.status='waiting';q.message=''});queueRender()});
 $('#dropzone').ondragover=e=>{e.preventDefault();$('#dropzone').classList.add('dragging')};$('#dropzone').ondragleave=()=>$('#dropzone').classList.remove('dragging');$('#dropzone').ondrop=guarded(async e=>{e.preventDefault();$('#dropzone').classList.remove('dragging');await addFiles(e.dataTransfer.files)});
@@ -126,7 +137,7 @@ function renderEpisodes(){
   $('#episode-count').textContent=`${all.length} 集 · 已上传 ${all.filter(e=>e.has_audio).length} 集`;
   const episodes=filteredEpisodes();
   selectedEpisodes=new Set([...selectedEpisodes].filter(id=>episodes.some(e=>e.id===id)));
-  $('#episode-list').innerHTML=episodes.map(e=>{const i=all.indexOf(e);return `<div class="episode-row" data-episode="${e.id}"><div class="episode-admin-cover"><label class="episode-select"><input type="checkbox" data-select-episode="${e.id}" aria-label="选择${esc(e.title)}" ${selectedEpisodes.has(e.id)?'checked':''}>选择</label>${cover(e)}</div><div class="episode-edit-fields"><label>分集名称<input value="${esc(e.title)}" maxlength="120" aria-label="第${i+1}条名称"></label><input data-subtitle value="${esc(e.subtitle)}" placeholder="副标题" aria-label="第${i+1}条副标题"><div class="episode-edit-meta"><span class="badge ${e.has_audio?'live':''}">${e.has_audio?'已有录音':'待上传录音'}</span><span class="muted">${format(e.duration)} · 序号 ${i+1}</span><select data-kind aria-label="第${i+1}条分类">${['故事','科学揭秘','番外'].map(k=>`<option ${k===e.kind?'selected':''}>${k}</option>`).join('')}</select></div></div><div class="episode-actions"><button class="primary" data-attach="${e.id}">${e.has_audio?'替换录音':'上传录音'}</button><button data-episode-save="${e.id}">保存信息</button><button data-episode-cover="${e.id}">换封面</button><button data-preview="${e.id}" ${e.has_audio?'':'disabled'}>试听</button><button data-move="${e.id}" data-direction="-1" ${i===0?'disabled':''} aria-label="上移第${i+1}条">↑</button><button data-move="${e.id}" data-direction="1" ${i===all.length-1?'disabled':''} aria-label="下移第${i+1}条">↓</button><button class="text-button" data-delete-episode="${e.id}">删除分集</button></div></div>`}).join('')||'<div class="empty">没有符合条件的分集。</div>';
+  $('#episode-list').innerHTML=episodes.map(e=>{const i=all.indexOf(e);return `<div class="episode-row" data-episode="${e.id}"><div class="episode-admin-cover"><label class="episode-select"><input type="checkbox" data-select-episode="${e.id}" aria-label="选择${esc(e.title)}" ${selectedEpisodes.has(e.id)?'checked':''}>选择</label>${cover(e)}</div><div class="episode-edit-fields"><label>分集名称<input value="${esc(e.title)}" maxlength="120" aria-label="第${i+1}条名称"></label><input data-subtitle value="${esc(e.subtitle)}" placeholder="副标题" aria-label="第${i+1}条副标题"><div class="episode-edit-meta"><span class="badge ${e.has_audio?'live':''}">${e.has_audio?'已有录音':'待上传录音'}</span><span class="muted">${format(e.duration)} · 序号 ${i+1}</span><select data-kind aria-label="第${i+1}条分类">${['故事','科学揭秘','番外'].map(k=>`<option ${k===e.kind?'selected':''}>${k}</option>`).join('')}</select></div></div><div class="episode-actions"><small class="direct-drop-hint">可拖入一个录音，直接上传到此集</small><button class="primary" data-attach="${e.id}">${e.has_audio?'替换录音':'上传录音'}</button><button data-episode-save="${e.id}">保存信息</button><button data-episode-cover="${e.id}">换封面</button><button data-preview="${e.id}" ${e.has_audio?'':'disabled'}>试听</button><button data-move="${e.id}" data-direction="-1" ${i===0?'disabled':''} aria-label="上移第${i+1}条">↑</button><button data-move="${e.id}" data-direction="1" ${i===all.length-1?'disabled':''} aria-label="下移第${i+1}条">↓</button><button class="text-button" data-delete-episode="${e.id}">删除分集</button></div></div>`}).join('')||'<div class="empty">没有符合条件的分集。</div>';
   updateEpisodeSelection();
 }
 function filteredEpisodes(){
@@ -262,3 +273,18 @@ $('#refresh-import').onclick = pollImport;
 $('#open-imported').onclick = guarded(async () => { await refresh(); if (catalog.stories.some(s=>s.id===importedStory)) openEditor(importedStory); else toast('该专辑已删除，请重新导入'); });
 async function init(){clearTimeout(importTimer);const session=await api('/api/admin/session');$('#login-panel').hidden=session.authenticated;$('#workspace').hidden=!session.authenticated;$('#new-story').disabled=!session.authenticated;$('#logout').hidden=!session.passwordRequired||!session.authenticated;$('#admin-mode').textContent=session.passwordRequired?'管理员模式':'本机管理模式';if(session.authenticated){await refresh();await pollImport()}}
 guarded(init)();
+
+function externalRecordingDrop(event,id){
+  event.preventDefault();event.stopPropagation();
+  document.querySelectorAll('.recording-drop-hover').forEach(n=>n.classList.remove('recording-drop-hover'));
+  return uploadDirect(event.dataTransfer.files,id);
+}
+$('#episode-list').addEventListener('dragover',event=>{
+  const row=event.target.closest('[data-episode]');if(!row||![...event.dataTransfer.types].includes('Files'))return;
+  event.preventDefault();event.dataTransfer.dropEffect=uploading||coverUploading||batchBusy?'none':'copy';
+  if(!uploading&&!coverUploading&&!batchBusy)row.classList.add('recording-drop-hover');
+});
+$('#episode-list').addEventListener('dragleave',event=>{const row=event.target.closest('[data-episode]');if(row&&!row.contains(event.relatedTarget))row.classList.remove('recording-drop-hover')});
+$('#episode-list').addEventListener('drop',guarded(event=>{const row=event.target.closest('[data-episode]');if(row&&[...event.dataTransfer.types].includes('Files'))return externalRecordingDrop(event,row.dataset.episode)}));
+window.addEventListener('dragover',event=>{if([...event.dataTransfer.types].includes('Files'))event.preventDefault()});
+window.addEventListener('drop',event=>{if([...event.dataTransfer.types].includes('Files'))event.preventDefault()});
